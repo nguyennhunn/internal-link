@@ -29,27 +29,30 @@ Agent **không** tự sửa bài trên website — người duyệt dán vào. A
    ```
 2. Mở Claude Code **đúng trong thư mục `agent-internal-link`** (script gọi bằng đường dẫn tương đối, mở sai thư mục sẽ không chạy).
 3. Copy `CLAUDE.md.example` → `.claude/CLAUDE.md`, sửa sheet-key, spreadsheet ID, tên dự án, quy tắc riêng.
-4. Kết nối Google Sheet — nói với Claude: **"kết nối sheet internal link"**. Claude dẫn từng bước:
+4. *(Tuỳ chọn, chỉ khi muốn agent ghi ngược lại sheet)* Kết nối Google Sheet — nói với Claude: **"kết nối sheet internal link"**. Claude dẫn từng bước:
    tạo OAuth Client ID (Desktop app, bật Google Sheets API, consent screen để *In production*), chạy lệnh `set-client` rồi `oauth`,
    bấm Cho phép trên trình duyệt. Token lưu vào `sheets-accounts.local.json` — file này đã bị chặn commit.
 
 ## Sheet mẫu
 
-**Tab `Internal link`** — header đúng chữ, dòng 1:
+**Tab `Internal link`** — mỗi hàng là **một bài cần chèn**, tối đa 3 link. Header dòng 1 đúng chữ:
 
-| STT | Key mục tiêu | URL đích | Anchor text | Bài cần chèn | Đoạn chèn | Vị trí chèn | Trạng thái | Ghi chú |
-|---|---|---|---|---|---|---|---|---|
-| 1 | xe máy điện đẹp | https://…/xe-may-dien-dep/ | xe máy điện đẹp | https://…/xe-may-dien-nam/ | *(agent điền)* | *(agent điền)* | *(agent điền)* | |
+| STT | Key mục tiêu 1 | URL đích 1 | Anchor text 1 | Key mục tiêu 2 | URL đích 2 | Anchor text 2 | Key mục tiêu 3 | URL đích 3 | Anchor text 3 | Bài cần chèn | Đoạn cần chèn | Vị trí chèn | Trạng thái | Ghi chú |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 
-Bạn điền 5 cột đầu. Agent điền 3 cột sau + ghi chú. Duyệt xong bạn đổi `Trạng thái` thành `Đã chèn`.
+Bạn điền các bộ (Key – URL đích – Anchor) và `Bài cần chèn`; chỉ 1 link thì để trống bộ 2, 3. Agent điền 4 cột cuối (nhiều link thì đánh số `[1]`, `[2]`, `[3]`). Duyệt xong bạn đổi `Trạng thái` thành `Đã chèn`.
+
+**Hai cách cho agent đọc sheet:**
+- *Chỉ đọc, không cần cài gì:* sheet để *Share → Anyone with the link → Viewer*, đưa link cho agent. Kết quả nằm trong trang HTML duyệt, agent không ghi được về sheet.
+- *Đọc + ghi về sheet:* nối OAuth theo bước 4 ở mục Cài đặt.
 
 ## Dùng hằng ngày
 
 Trong Claude Code, nói:
 
-- **"chạy agent internal link"** → viết đoạn cho mọi dòng chưa có `Đoạn chèn`, xuất `duyet-internal-link-<ngày>.html`.
-- **"chạy internal link dòng 3, 5"** → chỉ làm các STT đó.
-- **"viết lại dòng 4"** → viết lại một dòng đã có.
+- **"chạy agent internal link"** → viết đoạn cho mọi hàng chưa có `Đoạn cần chèn`, xuất `duyet-internal-link-<ngày>.html`.
+- **"chạy internal link hàng 3, 5"** → chỉ làm các hàng đó.
+- **"viết lại hàng 4"** → viết lại một hàng đã có.
 
 Mở file HTML bằng trình duyệt: mỗi thẻ hiện *đoạn trước → đoạn chèn (khung xanh) → đoạn sau*, bấm **Sao chép HTML** rồi dán vào bài ở chế độ soạn thảo HTML/Code.
 
@@ -62,7 +65,7 @@ Mở file HTML bằng trình duyệt: mỗi thẻ hiện *đoạn trước → �
 
 ## Một bài chèn 2-3 link thì sao?
 
-Cứ tạo 2-3 dòng có cùng `Bài cần chèn`. Agent gom các dòng cùng bài lại, tải bài **một lần**, chia các chỗ chèn **cách nhau ít nhất 3 đoạn**, mỗi đoạn chỉ chứa **một** link và các đoạn không nhắc tới nhau. Nếu số link quá dày so với độ dài bài (hơn 1 link mỗi 8 đoạn), agent vẫn viết nhưng ghi cảnh báo vào cột Ghi chú để bạn cân nhắc bớt.
+Điền bộ 2, bộ 3 trên cùng hàng. Agent tải bài **một lần**, chia các chỗ chèn **cách nhau ít nhất 3 đoạn**, mỗi đoạn chỉ chứa **một** link và các đoạn không nhắc tới nhau. Nếu số link quá dày so với độ dài bài (hơn 1 link mỗi 8 đoạn), agent vẫn viết nhưng ghi cảnh báo vào cột Ghi chú để bạn cân nhắc bớt.
 
 ## ⚠ Những điều phải biết
 

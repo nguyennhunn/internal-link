@@ -6,6 +6,7 @@ Lệnh:
   oauth       <accounts.json> <key> [port]           # lần đầu: mở trình duyệt, lưu refresh_token
   tabs        <accounts.json> <key>                  # liệt kê tên tab thật
   read        <accounts.json> <key> <tab> <out.json> # header (kèm hyperlink) + rows
+  read-public <spreadsheet_id> <gid> <out.json>      # sheet chia sẻ công khai, KHÔNG cần OAuth, chỉ đọc
   update-cell <accounts.json> <key> <tab> <A1> <value>
   append-rows <accounts.json> <key> <tab> <rows.json>   # rows.json = [["a","b"],...]
 
@@ -189,6 +190,31 @@ def cmd_read(path, key, tab, out):
     print(f"đã đọc tab '{tab}': {len(headers)} cột, {len(rows)} dòng → {out}")
 
 
+def cmd_read_public(spreadsheet_id, gid, out):
+    """Đọc sheet đang chia sẻ 'ai có link đều xem được' — không cần OAuth. gid lấy từ URL (#gid=...), tab đầu = 0.
+    Chỉ đọc; muốn ghi ngược lại sheet vẫn phải nối OAuth."""
+    import csv
+    import io
+    url = f"https://docs.google.com/spreadsheets/d/{spreadsheet_id}/export?format=csv&gid={gid}"
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+    try:
+        with urllib.request.urlopen(req, timeout=60) as r:
+            raw = r.read().decode("utf-8-sig")
+    except urllib.error.HTTPError as e:
+        die(f"không đọc được sheet công khai (HTTP {e.code}) — sheet phải ở chế độ 'Anyone with the link: Viewer'")
+    data = list(csv.reader(io.StringIO(raw)))
+    if not data:
+        die("sheet trống")
+    headers = [{"index": i, "text": h.strip(), "hyperlink": None} for i, h in enumerate(data[0])]
+    rows = []
+    for i, r in enumerate(data[1:], start=2):
+        vals = {h["text"]: (r[h["index"]].strip() if h["index"] < len(r) else "") for h in headers if h["text"]}
+        if any(vals.values()):
+            rows.append({"rowIndex": i, "values": vals, "hyperlinks": {}})
+    save(out, {"tab": f"gid={gid}", "headers": headers, "rows": rows, "read_only": True})
+    print(f"đã đọc sheet công khai gid={gid}: {len(headers)} cột, {len(rows)} dòng (chỉ đọc) → {out}")
+
+
 def cmd_update_cell(path, key, tab, a1, value):
     tok, sid = token(path, key)
     rng = urllib.parse.quote(f"{a1_tab(tab)}!{a1}", safe="")
@@ -213,7 +239,8 @@ def cmd_append_rows(path, key, tab, rows_file):
 
 if __name__ == "__main__":
     cmds = {"set-client": cmd_set_client, "oauth": cmd_oauth, "tabs": cmd_tabs,
-            "read": cmd_read, "update-cell": cmd_update_cell, "append-rows": cmd_append_rows}
+            "read": cmd_read, "read-public": cmd_read_public,
+            "update-cell": cmd_update_cell, "append-rows": cmd_append_rows}
     if len(sys.argv) < 2 or sys.argv[1] not in cmds:
         print(__doc__)
         sys.exit(1)

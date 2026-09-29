@@ -9,3 +9,4 @@
 .tmp/
 *.log
 __pycache__/
+duyet-internal-link-*.html
