@@ -23,7 +23,7 @@ Nếu biết bài đích nói gì (đã đọc qua `doc_bai.py fetch` hoặc URL
 5. **Giọng văn theo bài gốc**: bài xưng "bạn" thì đoạn chèn xưng "bạn"; bài dùng "anh em" thì theo. Đọc `truoc`/`doan`/`sau` để bắt giọng.
 6. **Không lặp thông tin** đã có trong `doan` hoặc `sau`. Không bịa số liệu, giá, thông số. Chỉ dùng thông tin có trong bài hoặc trong tiêu đề/URL bài đích.
 7. **Cấm** từ tuyệt đối không chứng minh ("tốt nhất", "số 1", "hàng đầu"), cấm "click vào đây", "tại đây", "xem thêm tại", "bài viết sau".
-8. **Một đoạn = một link.** Không nhét thêm link khác.
+8. **Một đoạn = một link.** Không nhét thêm link khác. Bài có 2-3 link cần chèn → viết 2-3 đoạn **riêng**, mỗi đoạn ở một chỗ cách nhau ≥ 3 đoạn (script `doc-bai` đã chia), các đoạn không nhắc tới nhau và không mở đầu giống nhau.
 9. Bài **đã có link tới URL đích** (`da_co_link_toi_dich: true`) → **không viết**, ghi `Trạng thái = Bỏ qua`, `Ghi chú = "Bài đã có link tới URL đích"`.
 
 ## Chọn vị trí

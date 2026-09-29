@@ -60,6 +60,10 @@ Mở file HTML bằng trình duyệt: mỗi thẻ hiện *đoạn trước → �
 3. Sửa quy tắc viết → sửa `.claude/skills/chen-internal-link/SKILL.md`, commit và push; người khác `git pull` là có bản mới.
 4. Sheet của dự án khác → thêm một sheet-key mới trong `sheets-accounts.local.json` và đổi `.claude/CLAUDE.md`.
 
+## Một bài chèn 2-3 link thì sao?
+
+Cứ tạo 2-3 dòng có cùng `Bài cần chèn`. Agent gom các dòng cùng bài lại, tải bài **một lần**, chia các chỗ chèn **cách nhau ít nhất 3 đoạn**, mỗi đoạn chỉ chứa **một** link và các đoạn không nhắc tới nhau. Nếu số link quá dày so với độ dài bài (hơn 1 link mỗi 8 đoạn), agent vẫn viết nhưng ghi cảnh báo vào cột Ghi chú để bạn cân nhắc bớt.
+
 ## ⚠ Những điều phải biết
 
 - **Bảo mật:** `*.local.json` chứa token thật. `.gitignore` đã chặn — đừng gỡ, đừng gửi qua chat.

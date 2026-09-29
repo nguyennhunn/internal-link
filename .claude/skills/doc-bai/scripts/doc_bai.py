@@ -8,6 +8,9 @@ Lệnh:
       → tải bài + chấm điểm từng đoạn theo độ gần nghĩa với key/anchor, in ra bản TÓM TẮT
         (tiêu đề, dàn ý H2/H3, 5 đoạn ứng viên kèm đoạn trước/sau, bài đã có link tới đích chưa)
         để Claude chỉ phải đọc đúng phần cần — tiết kiệm token.
+  chuan-bi-nhieu <url_bai> <yeu-cau.json> <out.json>
+      → như trên nhưng cho NHIỀU link vào cùng một bài. yeu-cau.json = [{"stt","key","anchor","url_dich"}, ...]
+        Tải bài 1 lần; các chỗ chèn được chia sao cho cách nhau >= 3 đoạn, không trùng nhau.
 """
 import json
 import re
@@ -214,60 +217,106 @@ def same_url(a, b):
     return f(a) == f(b)
 
 
-def cmd_chuan_bi(url_bai, key, anchor, url_dich, out):
-    doc = build_doc(url_bai)
-    blocks = doc["blocks"]
+KET_BAI = re.compile(r"^(trên đây|tóm lại|kết luận|như vậy|hy vọng|hi vọng|qua bài viết|bài viết trên)", re.I)
+KHOANG_CACH = 3  # hai chỗ chèn trong cùng bài phải cách nhau ít nhất 3 đoạn
+
+
+def scored_paras(blocks, key, anchor):
+    """Trả về danh sách đoạn <p> kèm điểm hợp nghĩa với key/anchor (điểm riêng cho từng yêu cầu)."""
     key_t, anc_t = set(tokens(key)), set(tokens(anchor))
     phrases = {strip_accents(key.lower()), strip_accents(anchor.lower())}
-    for b in blocks:
-        b["score"] = score_block(b, key_t, anc_t, phrases)
     paras = [b for b in blocks if b["tag"] == "p"]
-    # mở bài (2 đoạn đầu) và kết bài (2 đoạn cuối) không phải chỗ chèn tốt → giảm nửa điểm
-    ket_bai = re.compile(r"^(trên đây|tóm lại|kết luận|như vậy|hy vọng|hi vọng|qua bài viết|bài viết trên)", re.I)
+    out = []
     for pos, b in enumerate(paras):
+        s = score_block(b, key_t, anc_t, phrases)
         if pos < 2 or pos >= len(paras) - 3:
-            b["score"] = round(b["score"] * 0.5, 2)
-        if ket_bai.search(b["text"]):
-            b["score"] = round(b["score"] * 0.2, 2)
-    cands = sorted(paras, key=lambda b: -b["score"])[:5]
+            s *= 0.5  # mở bài / kết bài không phải chỗ chèn tốt
+        if KET_BAI.search(b["text"]):
+            s *= 0.2
+        out.append({"i": b["i"], "pos": pos, "score": round(s, 2)})
+    return out
 
+
+def make_candidate(blocks, n_para, c):
     def ctx(i):
         return blocks[i]["text"] if 0 <= i < len(blocks) else ""
 
-    def heading_above(i):
-        for j in range(i, -1, -1):
-            if blocks[j]["tag"] in ("h2", "h3"):
-                return blocks[j]["text"]
-        return "(mở bài)"
+    muc = "(mở bài)"
+    for j in range(c["i"], -1, -1):
+        if blocks[j]["tag"] in ("h2", "h3"):
+            muc = blocks[j]["text"]
+            break
+    return {
+        "i": c["i"], "score": c["score"],
+        "vi_tri": f"đoạn {c['pos'] + 1}/{n_para}",
+        "muc": muc,
+        "truoc": ctx(c["i"] - 1)[:300],
+        "doan": blocks[c["i"]]["text"],
+        "sau": ctx(c["i"] + 1)[:300],
+    }
 
-    n_para = len(paras)
-    candidates = []
-    for b in cands:
-        pos = paras.index(b)
-        candidates.append({
-            "i": b["i"], "score": b["score"],
-            "vi_tri": f"đoạn {pos + 1}/{n_para}",
-            "muc": heading_above(b["i"]),
-            "truoc": ctx(b["i"] - 1)[:300],
-            "doan": b["text"],
-            "sau": ctx(b["i"] + 1)[:300],
-        })
-    da_co_link = any(same_url(l, url_dich) for l in doc["links"])
-    anchor_da_dung = strip_accents(anchor.lower()) in strip_accents(" ".join(b["text"] for b in blocks).lower())
-    summary = {
-        "url_bai": url_bai, "title": doc["title"], "h1": doc["h1"],
+
+def summarize(doc, yeu_cau):
+    """yeu_cau = [{stt, key, anchor, url_dich}] — nhiều link vào cùng một bài.
+    Chia chỗ: yêu cầu có đoạn hợp nhất được chọn trước, các yêu cầu sau phải cách chỗ đã lấy >= KHOANG_CACH đoạn."""
+    blocks = doc["blocks"]
+    n_para = sum(1 for b in blocks if b["tag"] == "p")
+    full_text = strip_accents(" ".join(b["text"] for b in blocks).lower())
+    for r in yeu_cau:
+        r["_scored"] = scored_paras(blocks, r["key"], r["anchor"])
+        r["_best"] = max((c["score"] for c in r["_scored"]), default=0)
+    taken = []  # pos đã chiếm
+    results = {}
+    for r in sorted(yeu_cau, key=lambda r: -r["_best"]):  # yêu cầu chắc chắn nhất chọn trước
+        ok = [c for c in r["_scored"] if all(abs(c["pos"] - t) >= KHOANG_CACH for t in taken)]
+        cands = sorted(ok, key=lambda c: -c["score"])[:5]
+        if cands:
+            taken.append(cands[0]["pos"])
+        results[r["stt"]] = {
+            "stt": r["stt"], "key_muc_tieu": r["key"], "anchor": r["anchor"], "url_dich": r["url_dich"],
+            "da_co_link_toi_dich": any(same_url(l, r["url_dich"]) for l in doc["links"]),
+            "anchor_da_xuat_hien_trong_bai": strip_accents(r["anchor"].lower()) in full_text,
+            "ung_vien": [make_candidate(blocks, n_para, c) for c in cands],
+        }
+    return {
+        "url_bai": doc["url"], "title": doc["title"], "h1": doc["h1"],
         "so_doan": n_para, "so_tu": sum(len(b["text"].split()) for b in blocks),
         "dan_y": [f"{b['tag'].upper()}: {b['text']}" for b in blocks if b["tag"] in ("h2", "h3")],
-        "da_co_link_toi_dich": da_co_link,
-        "anchor_da_xuat_hien_trong_bai": anchor_da_dung,
-        "key_muc_tieu": key, "anchor": anchor, "url_dich": url_dich,
-        "ung_vien": candidates,
+        "so_link_can_chen": len(yeu_cau),
+        "canh_bao": (f"{len(yeu_cau)} link vào bài {n_para} đoạn là dày — cân nhắc bớt" if len(yeu_cau) > max(2, n_para // 8) else ""),
+        "yeu_cau": [results[r["stt"]] for r in yeu_cau],
     }
+
+
+def report(summary, out):
     with open(out, "w", encoding="utf-8") as f:
         json.dump(summary, f, ensure_ascii=False, indent=1)
-    print(f"'{doc['h1'] or doc['title']}' — {n_para} đoạn, {summary['so_tu']} từ; "
-          f"{'ĐÃ có' if da_co_link else 'chưa có'} link tới đích; "
-          f"ứng viên tốt nhất: điểm {cands[0]['score'] if cands else 0} → {out}")
+    print(f"'{summary['h1'] or summary['title']}' — {summary['so_doan']} đoạn, {summary['so_tu']} từ, "
+          f"{summary['so_link_can_chen']} link cần chèn → {out}")
+    for r in summary["yeu_cau"]:
+        best = r["ung_vien"][0] if r["ung_vien"] else None
+        print(f"  #{r['stt']} [{r['anchor']}] "
+              + ("ĐÃ có link tới đích — bỏ qua" if r["da_co_link_toi_dich"]
+                 else f"ứng viên tốt nhất: {best['vi_tri']} (điểm {best['score']})" if best else "không có ứng viên"))
+    if summary["canh_bao"]:
+        print("  CẢNH BÁO: " + summary["canh_bao"])
+
+
+def cmd_chuan_bi(url_bai, key, anchor, url_dich, out):
+    doc = build_doc(url_bai)
+    summary = summarize(doc, [{"stt": "1", "key": key, "anchor": anchor, "url_dich": url_dich}])
+    # một yêu cầu thì đưa các trường lên cấp cao nhất cho dễ đọc
+    summary.update({k: v for k, v in summary["yeu_cau"][0].items() if k != "stt"})
+    report(summary, out)
+
+
+def cmd_chuan_bi_nhieu(url_bai, yeu_cau_file, out):
+    with open(yeu_cau_file, encoding="utf-8") as f:
+        yeu_cau = json.load(f)
+    for r in yeu_cau:
+        r["stt"] = str(r.get("stt", ""))
+    doc = build_doc(url_bai)
+    report(summarize(doc, yeu_cau), out)
 
 
 if __name__ == "__main__":
@@ -276,6 +325,8 @@ if __name__ == "__main__":
         cmd_fetch(a[1], a[2])
     elif len(a) == 6 and a[0] == "chuan-bi":
         cmd_chuan_bi(*a[1:])
+    elif len(a) == 4 and a[0] == "chuan-bi-nhieu":
+        cmd_chuan_bi_nhieu(*a[1:])
     else:
         print(__doc__)
         sys.exit(1)

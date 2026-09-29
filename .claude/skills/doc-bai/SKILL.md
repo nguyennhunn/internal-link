@@ -28,6 +28,17 @@ Chọn ứng viên theo thứ tự ưu tiên:
 2. Đoạn có ý "kết thúc một ý nhỏ" — sau nó đặt thêm 2-3 câu chuyển tiếp là tự nhiên.
 3. Nếu tất cả điểm ≤ 1 (bài không liên quan gì tới key) → ghi chú "bài không có đoạn hợp ngữ nghĩa", vẫn đề xuất chèn vào cuối mục gần nhất, nhưng đánh dấu để người duyệt cân nhắc.
 
+## Nhiều link vào cùng một bài
+
+Khi 2-3 dòng trong sheet có cùng `Bài cần chèn`, **không** gọi `chuan-bi` nhiều lần (mỗi lần sẽ chọn cùng đoạn tốt nhất → trùng chỗ). Thay vào đó:
+
+```
+# .tmp/yc-1.json = [{"stt":"3","key":"...","anchor":"...","url_dich":"..."}, {"stt":"4",...}]
+python .claude/skills/doc-bai/scripts/doc_bai.py chuan-bi-nhieu "<URL bài>" .tmp/yc-1.json .tmp/bai-1.json
+```
+
+Kết quả có `yeu_cau[]` — mỗi phần tử là một yêu cầu với `ung_vien[]` riêng, **đã loại các đoạn nằm trong vòng 3 đoạn quanh chỗ yêu cầu khác đã lấy** (yêu cầu có đoạn hợp nhất được chia chỗ trước). Chọn `ung_vien[0]` của từng yêu cầu là an toàn. `canh_bao` khác rỗng nghĩa là số link so với độ dài bài đang dày (quá 1 link / 8 đoạn) — vẫn viết, nhưng ghi chú cho người duyệt.
+
 ## Lệnh phụ
 
 `python .claude/skills/doc-bai/scripts/doc_bai.py fetch <url> .tmp/x.json` — lấy toàn bộ khối, khi cần đọc kỹ cả bài (tốn token hơn, chỉ dùng khi bản tóm tắt không đủ).

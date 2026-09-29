@@ -10,6 +10,7 @@ import base64
 import html
 import json
 import os
+import re
 import sys
 from datetime import date
 
@@ -29,6 +30,11 @@ def main(inp, out, ten="Dự án"):
     if os.path.exists(LOGO):
         with open(LOGO, "rb") as f:
             logo = "data:image/png;base64," + base64.b64encode(f.read()).decode()
+    # các đoạn cùng một bài đứng cạnh nhau, theo thứ tự xuất hiện trong bài (vi_tri "đoạn 8/82")
+    def order(i):
+        m = re.search(r"đoạn (\d+)", i.get("vi_tri") or "")
+        return (i.get("bai") or "", int(m.group(1)) if m else 10**6)
+    items.sort(key=order)
     n_ok = sum(1 for i in items if (i.get("trang_thai") or "Đã viết") == "Đã viết")
     cards = []
     for i in items:
