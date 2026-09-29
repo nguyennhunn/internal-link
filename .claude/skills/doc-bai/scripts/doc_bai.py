@@ -223,9 +223,12 @@ def cmd_chuan_bi(url_bai, key, anchor, url_dich, out):
         b["score"] = score_block(b, key_t, anc_t, phrases)
     paras = [b for b in blocks if b["tag"] == "p"]
     # mở bài (2 đoạn đầu) và kết bài (2 đoạn cuối) không phải chỗ chèn tốt → giảm nửa điểm
+    ket_bai = re.compile(r"^(trên đây|tóm lại|kết luận|như vậy|hy vọng|hi vọng|qua bài viết|bài viết trên)", re.I)
     for pos, b in enumerate(paras):
-        if pos < 2 or pos >= len(paras) - 2:
+        if pos < 2 or pos >= len(paras) - 3:
             b["score"] = round(b["score"] * 0.5, 2)
+        if ket_bai.search(b["text"]):
+            b["score"] = round(b["score"] * 0.2, 2)
     cands = sorted(paras, key=lambda b: -b["score"])[:5]
 
     def ctx(i):
