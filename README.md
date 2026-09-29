@@ -2,7 +2,7 @@
 
 Bạn điền vào Google Sheet: **bài cần chèn – anchor text – URL đích**. Agent tự **đọc bài**, tìm **đoạn hợp nghĩa nhất**,
 **viết 2-3 câu** chứa anchor sao cho khớp ngữ cảnh, ghi lại vào sheet và xuất **trang HTML để duyệt** (có nút sao chép).
-Ngoài ra agent **lập kế hoạch link theo cụm từ khoá chính/phụ** (mô hình bài trụ – bài vệ tinh).
+Agent chỉ làm việc theo **key mục tiêu đã có sẵn** — việc lập kế hoạch link theo cụm từ khoá chính/phụ thuộc agent khác.
 
 Agent **không** tự sửa bài trên website — người duyệt dán vào. An toàn cho mọi dự án.
 
@@ -14,13 +14,12 @@ Agent **không** tự sửa bài trên website — người duyệt dán vào. A
 | `skill: sheet-internal-link` | Đọc/ghi Google Sheet (Python thuần, không cần cài thêm gì) |
 | `skill: doc-bai` | Tải bài, tách đoạn, chấm điểm đoạn hợp nghĩa, kiểm tra bài đã có link chưa |
 | `skill: chen-internal-link` | Quy tắc viết đoạn 2-3 câu chứa anchor |
-| `skill: internal-link-cum` | Sinh cặp link theo cụm từ khoá chính/phụ |
 | `skill: xuat-duyet` | Trang HTML duyệt theo nhận diện SEONGON |
 
 ## Yêu cầu
 
 - [Claude Code](https://claude.com/claude-code), Git, **Python 3.10+** (Windows: tải ở python.org, tích "Add to PATH").
-- Một Google Sheet có 2 tab (xem mẫu bên dưới) và quyền sửa sheet đó.
+- Một Google Sheet có tab `Internal link` (xem mẫu bên dưới) và quyền sửa sheet đó.
 
 ## Cài đặt (làm 1 lần / người)
 
@@ -44,20 +43,12 @@ Agent **không** tự sửa bài trên website — người duyệt dán vào. A
 
 Bạn điền 5 cột đầu. Agent điền 3 cột sau + ghi chú. Duyệt xong bạn đổi `Trạng thái` thành `Đã chèn`.
 
-**Tab `Cụm từ khoá`** (chỉ khi dùng chế độ theo cụm):
-
-| Cụm | Từ khoá | Loại | URL bài |
-|---|---|---|---|
-| xe máy điện | xe máy điện | Chính | https://…/xe-may-dien/ |
-| xe máy điện | xe máy điện cho nam | Phụ | https://…/xe-may-dien-nam/ |
-
 ## Dùng hằng ngày
 
 Trong Claude Code, nói:
 
 - **"chạy agent internal link"** → viết đoạn cho mọi dòng chưa có `Đoạn chèn`, xuất `duyet-internal-link-<ngày>.html`.
 - **"chạy internal link dòng 3, 5"** → chỉ làm các STT đó.
-- **"lập kế hoạch internal link theo cụm"** → sinh cặp link từ tab Cụm từ khoá, hỏi bạn xác nhận, thêm vào tab Internal link, rồi viết luôn.
 - **"viết lại dòng 4"** → viết lại một dòng đã có.
 
 Mở file HTML bằng trình duyệt: mỗi thẻ hiện *đoạn trước → đoạn chèn (khung xanh) → đoạn sau*, bấm **Sao chép HTML** rồi dán vào bài ở chế độ soạn thảo HTML/Code.

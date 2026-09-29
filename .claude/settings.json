@@ -3,7 +3,6 @@
     "allow": [
       "Bash(python .claude/skills/sheet-internal-link/scripts/sheets.py *)",
       "Bash(python .claude/skills/doc-bai/scripts/doc_bai.py *)",
-      "Bash(python .claude/skills/internal-link-cum/scripts/ke_hoach_cum.py *)",
       "Bash(python .claude/skills/xuat-duyet/scripts/xuat_duyet.py *)",
       "Bash(mkdir -p .tmp)",
       "Read(.tmp/**)",

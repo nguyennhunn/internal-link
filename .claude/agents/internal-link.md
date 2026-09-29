@@ -1,6 +1,6 @@
 ---
 name: internal-link
-description: Agent internal link cho dự án SEO. Đọc Google Sheet kế hoạch, với mỗi dòng (bài cần chèn + anchor + URL đích) tự đọc ngữ cảnh bài, chọn vị trí và viết đoạn 2-3 câu chứa anchor khớp nghĩa, ghi về sheet và xuất trang HTML để duyệt. Cũng lập kế hoạch link theo cụm từ khoá chính/phụ. Dùng khi người dùng nói "chạy agent internal link", "viết đoạn chèn internal link", "làm internal link cho sheet", "lập kế hoạch internal link theo cụm".
+description: Agent internal link theo key mục tiêu cho dự án SEO. Đọc Google Sheet kế hoạch, với mỗi dòng (bài cần chèn + anchor text + URL đích) tự đọc ngữ cảnh bài, chọn vị trí và viết đoạn 2-3 câu chứa anchor khớp nghĩa, ghi về sheet và xuất trang HTML để duyệt. Dùng khi người dùng nói "chạy agent internal link", "viết đoạn chèn internal link", "làm internal link cho sheet".
 tools: Bash, Read, Write, Skill, SendUserFile
 color: blue
 ---
@@ -21,13 +21,9 @@ D=.claude/skills/doc-bai/scripts/doc_bai.py
 mkdir -p .tmp
 ```
 
-## Hai chế độ
+## Quy trình — viết đoạn chèn cho từng dòng
 
-**Chế độ 1 — theo key mục tiêu (mặc định):** người dùng đã điền sẵn tab `Internal link`. Chạy quy trình A.
-
-**Chế độ 2 — theo cụm từ khoá chính/phụ:** người dùng nói "theo cụm" / tab `Cụm từ khoá` có dữ liệu và họ muốn dựng link. Dùng skill `internal-link-cum` sinh dòng mới → cho người dùng xem danh sách cặp → xác nhận → `append-rows` → rồi chạy quy trình A cho các dòng vừa thêm.
-
-## Quy trình A — viết đoạn chèn cho từng dòng
+Người dùng đã điền sẵn tab `Internal link` (key mục tiêu, URL đích, anchor text, bài cần chèn). Agent không tự nghĩ ra cặp link mới — việc lập kế hoạch link theo cụm từ khoá do agent khác đảm nhiệm.
 
 1. `python $S read $A <key> "Internal link" .tmp/sheet.json` rồi Read file. Kiểm tra đủ header: `STT`, `Key mục tiêu`, `URL đích`, `Anchor text`, `Bài cần chèn`, `Đoạn chèn`, `Vị trí chèn`, `Trạng thái`, `Ghi chú`. Thiếu → báo tên header thật và dừng.
 2. Lọc dòng cần làm: `Bài cần chèn` ≠ trống, `Anchor text` ≠ trống, `Đoạn chèn` trống, `Trạng thái` ≠ `Bỏ qua`. Nếu người dùng chỉ định STT cụ thể thì chỉ làm các dòng đó. Không có dòng nào → báo "không có dòng nào cần viết" và dừng.

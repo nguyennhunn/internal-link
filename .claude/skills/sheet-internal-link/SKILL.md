@@ -1,6 +1,6 @@
 ---
 name: sheet-internal-link
-description: Đọc/ghi Google Sheet kế hoạch internal link (tab "Internal link" và tab "Cụm từ khoá") qua Google Sheets API v4 bằng script Python thuần. Dùng khi agent internal-link cần đọc danh sách bài cần chèn, ghi đoạn văn đã viết về sheet, thêm dòng kế hoạch mới, hoặc khi người dùng nói "kết nối sheet internal link", "đọc sheet internal link". Không viết nội dung, không sửa bài trên web.
+description: Đọc/ghi Google Sheet kế hoạch internal link (tab "Internal link") qua Google Sheets API v4 bằng script Python thuần. Dùng khi agent internal-link cần đọc danh sách bài cần chèn, ghi đoạn văn đã viết về sheet, hoặc khi người dùng nói "kết nối sheet internal link", "đọc sheet internal link". Không viết nội dung, không sửa bài trên web.
 ---
 
 # sheet-internal-link
@@ -26,15 +26,6 @@ Tay đọc/ghi sổ cho agent `internal-link`. Mọi thao tác đi qua **một s
 
 Dòng cần xử lý = có `Bài cần chèn` + có `Anchor text` + `Đoạn chèn` trống + `Trạng thái` ≠ `Bỏ qua`.
 
-### Tab `Cụm từ khoá` (chỉ khi chạy chế độ nhóm từ khoá chính/phụ)
-
-| Cột | Header | Ghi chú |
-|---|---|---|
-| A | `Cụm` | tên cụm, vd "xe máy điện" |
-| B | `Từ khoá` | |
-| C | `Loại` | `Chính` hoặc `Phụ` — mỗi cụm đúng 1 dòng Chính |
-| D | `URL bài` | bài đang giữ từ khoá đó |
-
 ## Lần đầu kết nối (làm 1 lần / máy)
 
 1. Tạo OAuth Client ID (Desktop app) tại console.cloud.google.com/apis/credentials, bật **Google Sheets API**.
@@ -57,8 +48,9 @@ A=.claude/skills/sheet-internal-link/sheets-accounts.local.json
 python $S tabs $A <key>                                  # xem tên tab thật
 python $S read $A <key> "Internal link" .tmp/sheet.json  # đọc
 python $S update-cell $A <key> "Internal link" F5 "<p>...</p>"
-python $S append-rows $A <key> "Internal link" .tmp/rows.json
 ```
+
+(`append-rows` có sẵn trong script nhưng agent này không dùng — chỉ ghi vào dòng người dùng đã tạo.)
 
 `read` xuất JSON `{headers:[{index,text,hyperlink}], rows:[{rowIndex, values{header: text}, hyperlinks{header: url}}]}`.
 Ghi ô nào thì dùng đúng `rowIndex` từ JSON, không tự đếm.
