@@ -1,0 +1,28 @@
+# Project: <Tên dự án> — internal link
+
+> File MẪU. Copy thành `.claude/CLAUDE.md` rồi sửa. Agent `internal-link` đọc file này để biết sheet nào, dự án nào, quy tắc gì.
+> Không ghi mật khẩu/token vào đây — chúng nằm trong `sheets-accounts.local.json` (không commit).
+
+## Sheet
+
+- Sheet-key (tên khai trong `sheet-internal-link/sheets-accounts.local.json`): `osakar`
+- Spreadsheet ID: `<đoạn giữa /d/ và /edit trên URL sheet>`
+- Tab kế hoạch: `Internal link`
+- Tab cụm từ khoá (nếu dùng chế độ theo cụm): `Cụm từ khoá`
+- Tên dự án hiển thị trên trang duyệt: `OSAKAR`
+
+## Website
+
+- Domain: `osakar.com.vn` — mọi URL đích phải thuộc domain này (khác domain → cảnh báo, không viết).
+- Giọng văn: xưng "bạn", thân thiện, không hô hào.
+
+## Quy tắc viết riêng
+
+- Từ/cụm CẤM: "rẻ nhất", "số 1 Việt Nam", ...
+- Tên thương hiệu viết đúng: `OSAKAR` (in hoa), tên dòng xe giữ nguyên như bài gốc.
+- Không nhắc giá cụ thể trong đoạn chèn (giá đổi theo thời điểm).
+
+## Quy ước chung
+
+- `*.local.json` chứa bí mật thật — không commit, không dán vào chat.
+- Mỗi người trong team tự kết nối Google Sheet trên máy mình (Client ID có thể dùng chung của công ty, refresh_token là của từng người).

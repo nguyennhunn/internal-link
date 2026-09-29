@@ -1,0 +1,38 @@
+---
+name: doc-bai
+description: Tải một bài viết trên web, tách thành tiêu đề / dàn ý H2-H3 / từng đoạn văn, kiểm tra bài đã có link tới URL đích chưa, và chấm điểm 5 đoạn gần nghĩa nhất với từ khoá mục tiêu để chọn chỗ chèn internal link. Dùng khi cần "đọc context bài", "tìm chỗ chèn link", hoặc khi agent internal-link chuẩn bị viết đoạn chèn. Chỉ đọc, không sửa bài.
+---
+
+# doc-bai
+
+Mắt đọc bài cho agent `internal-link`. Script `scripts/doc_bai.py` làm phần nặng
+(tải, lọc menu/footer/sidebar, tách đoạn, chấm điểm) — Claude chỉ đọc bản tóm tắt nhỏ.
+
+## Lệnh chính — dùng cho mỗi dòng cần chèn
+
+```
+python .claude/skills/doc-bai/scripts/doc_bai.py chuan-bi "<URL bài cần chèn>" "<Key mục tiêu>" "<Anchor text>" "<URL đích>" .tmp/bai-<stt>.json
+```
+
+Sau đó **Read** file `.tmp/bai-<stt>.json`. Nội dung:
+
+| Trường | Ý nghĩa |
+|---|---|
+| `h1`, `title`, `dan_y` | Hiểu bài đang nói gì, cấu trúc ra sao |
+| `da_co_link_toi_dich` | `true` → bài đã trỏ tới URL đích rồi. **Không chèn thêm**, ghi chú lại |
+| `anchor_da_xuat_hien_trong_bai` | `true` → anchor đã có trong bài dạng chữ thường; có thể cân nhắc gắn link vào chỗ đó thay vì viết đoạn mới (nhưng mặc định vẫn viết đoạn mới vì người dùng yêu cầu) |
+| `ung_vien[]` | 5 đoạn văn điểm cao nhất, mỗi cái có `muc` (H2/H3 chứa nó), `truoc`, `doan`, `sau`, `vi_tri` |
+
+Chọn ứng viên theo thứ tự ưu tiên:
+1. Điểm cao **và** nằm trong thân bài (không phải đoạn 1-2 mở bài, không phải 1-2 đoạn cuối).
+2. Đoạn có ý "kết thúc một ý nhỏ" — sau nó đặt thêm 2-3 câu chuyển tiếp là tự nhiên.
+3. Nếu tất cả điểm ≤ 1 (bài không liên quan gì tới key) → ghi chú "bài không có đoạn hợp ngữ nghĩa", vẫn đề xuất chèn vào cuối mục gần nhất, nhưng đánh dấu để người duyệt cân nhắc.
+
+## Lệnh phụ
+
+`python .claude/skills/doc-bai/scripts/doc_bai.py fetch <url> .tmp/x.json` — lấy toàn bộ khối, khi cần đọc kỹ cả bài (tốn token hơn, chỉ dùng khi bản tóm tắt không đủ).
+
+## Giới hạn đã biết
+
+- Trang chặn bot (403) hoặc render bằng JavaScript → không lấy được nội dung. Báo người dùng dán nội dung bài trực tiếp.
+- Bộ lọc nhận diện phần thân bài theo `<article>`, `<main>`, class `entry-content`/`post-content`… Nếu `so_doan` quá ít so với thực tế, chạy `fetch` và xem `blocks` để kiểm tra.

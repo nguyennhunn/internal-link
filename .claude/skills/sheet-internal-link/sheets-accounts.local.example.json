@@ -1,0 +1,10 @@
+{
+  "ten-du-an": {
+    "client_id": "XXXX.apps.googleusercontent.com",
+    "client_secret": "DIEN_SAU_KHI_TAO_OAUTH_CLIENT",
+    "spreadsheet_id": "ID_SHEET_LAY_TU_URL_/d/<ID>/edit",
+    "refresh_token": "TU_DONG_DIEN_SAU_KHI_AUTHORIZE",
+    "access_token": "TU_DONG_DIEN",
+    "obtained_at": "TU_DONG_DIEN"
+  }
+}

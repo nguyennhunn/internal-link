@@ -1,0 +1,11 @@
+# Bí mật thật - KHÔNG BAO GIỜ commit
+*.local.json
+.env
+.env.*
+.claude/settings.local.json
+.claude/CLAUDE.md
+
+# File tạm khi chạy
+.tmp/
+*.log
+__pycache__/
