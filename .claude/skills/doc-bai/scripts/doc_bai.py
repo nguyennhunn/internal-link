@@ -130,35 +130,71 @@ def pick_container(root):
     return best
 
 
+XEM_THEM = re.compile(r"(có thể bạn quan tâm|xem thêm|tham khảo|đọc thêm|bài viết liên quan|chi tiết tham khảo|xem ngay|tìm hiểu thêm)", re.I)
+
+
 def extract_blocks(container):
+    """Tách khối văn bản (h1-h4, p, li, blockquote) trong phần thân bài. Mỗi khối ghi kèm các link nằm bên trong nó,
+    để phân biệt link trong câu văn với link ở menu/footer/bài liên quan (không thuộc khối nào)."""
     blocks, links = [], []
+
+    def links_in(n, acc):
+        if isinstance(n, str) or n.tag in SKIP_TAGS:
+            return
+        if n.tag == "a" and n.attrs.get("href"):
+            acc.append({"href": n.attrs["href"], "text": norm(text_of(n))})
+        for c in n.children:
+            links_in(c, acc)
+
+    def has_block_inside(n):
+        if isinstance(n, str) or n.tag in SKIP_TAGS:
+            return False
+        return any(isinstance(c, Node) and (c.tag in BLOCK_TAGS or has_block_inside(c)) for c in n.children)
+
+    def flush_direct(nodes):
+        t = norm("".join(text_of(c) for c in nodes))
+        if len(t) < 25:
+            return
+        inner = []
+        for c in nodes:
+            if isinstance(c, Node):
+                links_in(c, inner)
+        links.extend(l["href"] for l in inner)
+        blocks.append({"i": len(blocks), "tag": "p", "text": t, "links": inner, "xem_them": bool(XEM_THEM.search(t))})
 
     def walk(n):
         if isinstance(n, str) or n.tag in SKIP_TAGS:
             return
         if SKIP_CLASS.search(cls(n)) and n.tag not in BLOCK_TAGS:
             return
-        if n.tag == "a" and n.attrs.get("href"):
-            links.append(n.attrs["href"])
+        if n.tag in BLOCK_TAGS and has_block_inside(n):
+            # HTML lỗi: <p> chưa đóng nuốt cả bài → không coi là 1 đoạn, đi tiếp vào trong;
+            # phần chữ nằm trực tiếp trong nó (không thuộc khối con) gom thành các đoạn riêng
+            direct = []
+            for c in n.children:
+                if isinstance(c, str) or (isinstance(c, Node) and c.tag not in BLOCK_TAGS and not has_block_inside(c)):
+                    direct.append(c)
+                else:
+                    flush_direct(direct)
+                    direct = []
+                    walk(c)
+            flush_direct(direct)
+            return
         if n.tag in BLOCK_TAGS:
             t = norm(text_of(n))
-            if t and (n.tag.startswith("h") or len(t) >= 25):
-                blocks.append({"i": len(blocks), "tag": n.tag, "text": t})
-            # vẫn đi tiếp để gom link bên trong
-            for c in n.children:
-                if isinstance(c, Node):
-                    collect_links(c)
-            return
-        for c in n.children:
-            walk(c)
-
-    def collect_links(n):
-        if isinstance(n, str) or n.tag in SKIP_TAGS:
+            inner = []
+            links_in(n, inner)
+            links.extend(l["href"] for l in inner)
+            if t and (n.tag.startswith("h") or len(t) >= 25 or (n.tag == "li" and inner)):
+                # mục danh sách chỉ gồm đúng cái link (không có câu văn) = link liệt kê, không phải link trong ngữ cảnh
+                chi_co_link = n.tag == "li" and bool(inner) and norm(" ".join(l["text"] for l in inner)) == t
+                blocks.append({"i": len(blocks), "tag": n.tag, "text": t, "links": inner,
+                               "xem_them": bool(XEM_THEM.search(t)) or chi_co_link})
             return
         if n.tag == "a" and n.attrs.get("href"):
             links.append(n.attrs["href"])
         for c in n.children:
-            collect_links(c)
+            walk(c)
 
     walk(container)
     return blocks, links
@@ -231,7 +267,7 @@ def scored_paras(blocks, key, anchor):
         s = score_block(b, key_t, anc_t, phrases)
         if pos < 2 or pos >= len(paras) - 3:
             s *= 0.5  # mở bài / kết bài không phải chỗ chèn tốt
-        if KET_BAI.search(b["text"]):
+        if KET_BAI.search(b["text"]) or b.get("xem_them"):
             s *= 0.2
         out.append({"i": b["i"], "pos": pos, "score": round(s, 2)})
     return out
@@ -274,7 +310,10 @@ def summarize(doc, yeu_cau):
             taken.append(cands[0]["pos"])
         results[r["stt"]] = {
             "stt": r["stt"], "key_muc_tieu": r["key"], "anchor": r["anchor"], "url_dich": r["url_dich"],
-            "da_co_link_toi_dich": any(same_url(l, r["url_dich"]) for l in doc["links"]),
+            # link tới đích nằm trong câu văn thật → đã có, bỏ qua; nằm ở dòng "Có thể bạn quan tâm/Xem thêm" → vẫn viết, ghi chú
+            "da_co_link_toi_dich": any(not b["xem_them"] and any(same_url(l["href"], r["url_dich"]) for l in b["links"]) for b in blocks),
+            "link_dang_liet_ke": [b["text"][:120] for b in blocks if b["xem_them"] and any(same_url(l["href"], r["url_dich"]) for l in b["links"])],
+            "link_ngoai_than_bai": any(same_url(l, r["url_dich"]) for l in doc["links"]) and not any(any(same_url(l["href"], r["url_dich"]) for l in b["links"]) for b in blocks),
             "anchor_da_xuat_hien_trong_bai": strip_accents(r["anchor"].lower()) in full_text,
             "ung_vien": [make_candidate(blocks, n_para, c) for c in cands],
         }
@@ -296,8 +335,10 @@ def report(summary, out):
     for r in summary["yeu_cau"]:
         best = r["ung_vien"][0] if r["ung_vien"] else None
         print(f"  #{r['stt']} [{r['anchor']}] "
-              + ("ĐÃ có link tới đích — bỏ qua" if r["da_co_link_toi_dich"]
-                 else f"ứng viên tốt nhất: {best['vi_tri']} (điểm {best['score']})" if best else "không có ứng viên"))
+              + ("ĐÃ có link tới đích trong câu văn — bỏ qua" if r["da_co_link_toi_dich"]
+                 else f"ứng viên tốt nhất: {best['vi_tri']} (điểm {best['score']})" if best else "không có ứng viên")
+              + (f" | đang có link dạng liệt kê: {len(r['link_dang_liet_ke'])} chỗ" if r["link_dang_liet_ke"] else "")
+              + (" | có link ở menu/bài liên quan (không tính)" if r["link_ngoai_than_bai"] else ""))
     if summary["canh_bao"]:
         print("  CẢNH BÁO: " + summary["canh_bao"])
 

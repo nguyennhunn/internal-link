@@ -19,7 +19,9 @@ Sau đó **Read** file `.tmp/bai-<stt>.json`. Nội dung:
 | Trường | Ý nghĩa |
 |---|---|
 | `h1`, `title`, `dan_y` | Hiểu bài đang nói gì, cấu trúc ra sao |
-| `da_co_link_toi_dich` | `true` → bài đã trỏ tới URL đích rồi. **Không chèn thêm**, ghi chú lại |
+| `da_co_link_toi_dich` | `true` → bài đã có link tới URL đích **trong một câu văn thật**. Không chèn thêm, ghi chú lại |
+| `link_dang_liet_ke` | các dòng "Có thể bạn quan tâm / Xem thêm" hoặc mục danh sách chỉ có tên bài đang trỏ tới đích. Vẫn viết đoạn mới; ghi chú để người duyệt bỏ dòng liệt kê |
+| `link_ngoai_than_bai` | link tới đích chỉ có ở menu/footer/bài liên quan — không tính |
 | `anchor_da_xuat_hien_trong_bai` | `true` → anchor đã có trong bài dạng chữ thường; có thể cân nhắc gắn link vào chỗ đó thay vì viết đoạn mới (nhưng mặc định vẫn viết đoạn mới vì người dùng yêu cầu) |
 | `ung_vien[]` | 5 đoạn văn điểm cao nhất, mỗi cái có `muc` (H2/H3 chứa nó), `truoc`, `doan`, `sau`, `vi_tri` |
 

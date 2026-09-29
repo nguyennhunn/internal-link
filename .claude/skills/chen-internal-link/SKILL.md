@@ -24,7 +24,8 @@ Nếu biết bài đích nói gì (đã đọc qua `doc_bai.py fetch` hoặc URL
 6. **Không lặp thông tin** đã có trong `doan` hoặc `sau`. Không bịa số liệu, giá, thông số. Chỉ dùng thông tin có trong bài hoặc trong tiêu đề/URL bài đích.
 7. **Cấm** từ tuyệt đối không chứng minh ("tốt nhất", "số 1", "hàng đầu"), cấm "click vào đây", "tại đây", "xem thêm tại", "bài viết sau".
 8. **Một đoạn = một link.** Không nhét thêm link khác. Bài có 2-3 link cần chèn → viết 2-3 đoạn **riêng**, mỗi đoạn ở một chỗ cách nhau ≥ 3 đoạn (script `doc-bai` đã chia), các đoạn không nhắc tới nhau và không mở đầu giống nhau.
-9. Bài **đã có link tới URL đích** (`da_co_link_toi_dich: true`) → **không viết**, ghi `Trạng thái = Bỏ qua`, `Ghi chú = "Bài đã có link tới URL đích"`.
+9. Bài **đã có link tới URL đích trong câu văn thật** (`da_co_link_toi_dich: true`) → **không viết**, ghi chú "[n] bài đã có link tới URL đích trong câu văn". Link chỉ nằm ở dòng liệt kê kiểu "Có thể bạn quan tâm / Xem thêm" hoặc mục danh sách chỉ có tên bài (`link_dang_liet_ke` khác rỗng) → **vẫn viết** đoạn có ngữ cảnh, và ghi chú "chèn xong có thể bỏ dòng liệt kê để tránh trùng link". Link ở menu/footer/bài liên quan (`link_ngoai_than_bai`) không tính.
+10. Bài **xa chủ đề** với key (điểm ứng viên cao nhất ≤ 4) → vẫn viết bằng một cầu nối hợp lý (đối tượng liên quan, tình huống sử dụng), nhưng ghi chú "điểm khớp thấp, người duyệt cân nhắc".
 
 ## Chọn vị trí
 
