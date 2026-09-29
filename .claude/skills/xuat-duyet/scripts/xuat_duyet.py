@@ -74,7 +74,8 @@ def main(inp, out, ten="Dự án"):
 main{{padding:20px 16px 60px}}
 .card{{background:var(--nen);border-radius:16px;padding:18px 20px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.06)}}
 .card.skip{{opacity:.6}}
-.card header{{display:flex;gap:14px;align-items:flex-start}}
+.card header{{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap}}
+.card header>div{{flex:1 1 240px;min-width:0}}
 .stt{{background:var(--xanh);color:#fff;border-radius:9999px;padding:2px 12px;font-weight:600;font-size:14px;white-space:nowrap}}
 .key{{font-weight:600;font-size:17px}}.meta{{font-size:13px;color:#555;word-break:break-all}}.meta a{{color:var(--xanh)}}
 .badge{{margin-left:auto;background:var(--xam);border-radius:9999px;padding:2px 12px;font-size:13px;white-space:nowrap}}
