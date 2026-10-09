@@ -20,7 +20,8 @@ Nếu biết bài đích nói gì (đã đọc qua `doc_bai.py fetch` hoặc URL
 1b. **Giọng tự nhiên như đang nói với người đọc**, không phải văn báo cáo:
    - Mỗi câu một ý. Không nối 2-3 vế bằng dấu chấm phẩy, gạch ngang, "và… nên… nhưng…".
    - Không mở câu bằng "Tất nhiên", "Thực tế", "Có thể thấy", "Điểm dễ nhầm là", "Vì vậy" — vào thẳng ý.
-   - Dùng từ hằng ngày: "xem", "chọn", "cần" thay cho "tham khảo", "lựa chọn", "cần thiết"; "bố mẹ" thay "phụ huynh" nếu bài gốc không dùng "phụ huynh".
+   - **Tự nhiên nhưng vẫn là văn web chuyên nghiệp**, không phải văn nói. Được dùng "cân nhắc", "lựa chọn", "tham khảo" khi câu ngắn; tránh từ suồng sã kiểu "để ý", "tìm hẳn", "xịn", "ngon". Ví dụ chuẩn theo người dùng duyệt: *"nên cân nhắc thêm các yếu tố chiều cao yên và cách lên xuống xe cho an toàn"* (đúng) — *"nên để ý thêm chiều cao yên…"* (quá suồng sã).
+   - "bố mẹ" / "phụ huynh": theo cách gọi trong bài gốc.
    - Không liệt kê kiểu "pin, phanh, đèn và chế độ bảo hành" quá 3 món.
    - Đọc to lên thấy giống câu người viết bài gốc sẽ viết thì mới đạt.
 2. **Câu 1 nối tiếp ý của đoạn `doan` vừa đọc** — nhắc lại một chi tiết/ý trong đó (không chép nguyên câu), rồi mở ra vấn đề mà bài đích giải quyết.
