@@ -23,6 +23,8 @@ Nếu biết bài đích nói gì (đã đọc qua `doc_bai.py fetch` hoặc URL
    - **Tự nhiên nhưng vẫn là văn web chuyên nghiệp**, không phải văn nói. Được dùng "cân nhắc", "lựa chọn", "tham khảo" khi câu ngắn; tránh từ suồng sã kiểu "để ý", "tìm hẳn", "xịn", "ngon". Ví dụ chuẩn theo người dùng duyệt: *"nên cân nhắc thêm các yếu tố chiều cao yên và cách lên xuống xe cho an toàn"* (đúng) — *"nên để ý thêm chiều cao yên…"* (quá suồng sã).
    - "bố mẹ" / "phụ huynh": theo cách gọi trong bài gốc.
    - Không liệt kê kiểu "pin, phanh, đèn và chế độ bảo hành" quá 3 món.
+   - **Trật tự câu xuôi**: nguyên nhân/điều kiện đứng đầu câu ("Vì mốc 16 tuổi này, nhiều gia đình…"), không đẩy ra cuối ("…phải mua hai loại xe vì mốc 16 tuổi này").
+   - **Câu kết nối trở lại bài** (nếu có) phải trung tính, đủ chủ ngữ: "Phần tiếp theo của bài tập trung vào…" — không viết cụt kiểu "Còn phần dưới đây chỉ nói về…". Không cần câu này thì bỏ, 2 câu là đủ.
    - Đọc to lên thấy giống câu người viết bài gốc sẽ viết thì mới đạt.
 2. **Câu 1 nối tiếp ý của đoạn `doan` vừa đọc** — nhắc lại một chi tiết/ý trong đó (không chép nguyên câu), rồi mở ra vấn đề mà bài đích giải quyết.
 3. **Câu 2 (hoặc 3) chứa anchor** — anchor nằm **giữa câu**, không mở đầu câu, không đứng một mình cuối câu kiểu "xem thêm: anchor".
