@@ -41,6 +41,7 @@ Nếu biết bài đích nói gì (đã đọc qua `doc_bai.py fetch` hoặc URL
 
 ## Chọn vị trí
 
+- **Chèn ở cuối phần nội dung của một heading** (sau đoạn văn cuối cùng của mục, ngay trước heading kế tiếp). **Không chèn ngay sau heading** / sau đoạn đầu tiên của mục — người dùng yêu cầu (09/10/2026). Script `doc-bai` đã đánh dấu ứng viên "cuối mục" / "ĐẦU MỤC, tránh"; chỉ chọn "cuối mục", bất đắc dĩ mới "giữa mục", không bao giờ "đầu mục".
 - Mặc định: **ngay sau** đoạn ứng viên đã chọn. Ghi cột `Vị trí chèn` dạng:
   `Sau đoạn bắt đầu bằng: "<10-12 chữ đầu của đoan>…" (mục H2: <muc>)`
 - Tránh: sau H1/đoạn mở bài đầu tiên, sau đoạn kết luận cuối cùng, bên trong danh sách `<li>`, ngay trước/sau một đoạn đã có link nội bộ khác (nếu `truoc`/`sau` chứa `<a` hoặc ứng viên khác cũng đủ điểm thì chọn ứng viên khác).

@@ -25,8 +25,10 @@ Sau đó **Read** file `.tmp/bai-<stt>.json`. Nội dung:
 | `anchor_da_xuat_hien_trong_bai` | `true` → anchor đã có trong bài dạng chữ thường; có thể cân nhắc gắn link vào chỗ đó thay vì viết đoạn mới (nhưng mặc định vẫn viết đoạn mới vì người dùng yêu cầu) |
 | `ung_vien[]` | 5 đoạn văn điểm cao nhất, mỗi cái có `muc` (H2/H3 chứa nó), `truoc`, `doan`, `sau`, `vi_tri` |
 
+Mỗi ứng viên có nhãn vị trí trong `vi_tri`: **"cuối mục"** (đoạn văn cuối của một heading, trước heading kế — *chỗ chèn chuẩn*), "giữa mục", hoặc **"ĐẦU MỤC, tránh"** (ngay sau heading — không chèn). Khi `khoi_cuoi_la_danh_sach: true`, sau đoạn còn danh sách gạch đầu dòng → chỗ chèn thật là **sau danh sách** (`chen_sau` là khối cuối cùng của mục); ghi cột Vị trí chèn kiểu *Cuối mục "…" — sau danh sách, ngay trước H3 x.y*.
+
 Chọn ứng viên theo thứ tự ưu tiên:
-1. Điểm cao **và** nằm trong thân bài (không phải đoạn 1-2 mở bài, không phải 1-2 đoạn cuối).
+1. Nhãn "cuối mục", điểm cao **và** nằm trong thân bài (không phải đoạn 1-2 mở bài, không phải 1-2 đoạn cuối).
 2. Đoạn có ý "kết thúc một ý nhỏ" — sau nó đặt thêm 2-3 câu chuyển tiếp là tự nhiên.
 3. Nếu tất cả điểm ≤ 1 (bài không liên quan gì tới key) → ghi chú "bài không có đoạn hợp ngữ nghĩa", vẫn đề xuất chèn vào cuối mục gần nhất, nhưng đánh dấu để người duyệt cân nhắc.
 

@@ -262,15 +262,35 @@ def scored_paras(blocks, key, anchor):
     key_t, anc_t = set(tokens(key)), set(tokens(anchor))
     phrases = {strip_accents(key.lower()), strip_accents(anchor.lower())}
     paras = [b for b in blocks if b["tag"] == "p"]
+    is_h = lambda b: b["tag"] in ("h1", "h2", "h3", "h4")
     out = []
     for pos, b in enumerate(paras):
         s = score_block(b, key_t, anc_t, phrases)
         if pos < 2 or pos >= len(paras) - 3:
             s *= 0.5  # mở bài / kết bài không phải chỗ chèn tốt
+        # vị trí trong mục: chèn ở CUỐI phần nội dung của heading (trước heading kế), không chèn ngay sau heading
+        i = b["i"]
+        dau_muc = i > 0 and is_h(blocks[i - 1])
+        j = i + 1
+        while j < len(blocks) and not is_h(blocks[j]) and blocks[j]["tag"] != "p":
+            j += 1  # bỏ qua li/blockquote sau đoạn
+        cuoi_muc = j >= len(blocks) or is_h(blocks[j])
+        if cuoi_muc:
+            s *= 1.3
+        elif dau_muc:
+            s *= 0.4
+        b["cuoi_muc"], b["dau_muc"] = cuoi_muc, dau_muc
         if KET_BAI.search(b["text"]) or b.get("xem_them"):
             s *= 0.2
         out.append({"i": b["i"], "pos": pos, "score": round(s, 2)})
     return out
+
+
+def last_block_before_heading(blocks, i):
+    j = i
+    while j + 1 < len(blocks) and blocks[j + 1]["tag"] not in ("h1", "h2", "h3", "h4"):
+        j += 1
+    return j
 
 
 def make_candidate(blocks, n_para, c):
@@ -282,9 +302,13 @@ def make_candidate(blocks, n_para, c):
         if blocks[j]["tag"] in ("h2", "h3"):
             muc = blocks[j]["text"]
             break
+    b = blocks[c["i"]]
     return {
         "i": c["i"], "score": c["score"],
-        "vi_tri": f"đoạn {c['pos'] + 1}/{n_para}",
+        "vi_tri": f"đoạn {c['pos'] + 1}/{n_para}" + (" — cuối mục" if b.get("cuoi_muc") else " — ĐẦU MỤC, tránh" if b.get("dau_muc") else " — giữa mục"),
+        # cuối mục nhưng sau đoạn còn danh sách/blockquote → chỗ chèn thật là SAU khối cuối cùng đó, trước heading kế
+        "chen_sau": (blocks[last_block_before_heading(blocks, c["i"])]["text"][:120] if b.get("cuoi_muc") else blocks[c["i"]]["text"][:120]),
+        "khoi_cuoi_la_danh_sach": bool(b.get("cuoi_muc")) and last_block_before_heading(blocks, c["i"]) != c["i"],
         "muc": muc,
         "truoc": ctx(c["i"] - 1)[:300],
         "doan": blocks[c["i"]]["text"],
