@@ -16,7 +16,13 @@ Nếu biết bài đích nói gì (đã đọc qua `doc_bai.py fetch` hoặc URL
 
 ## Quy tắc viết — bắt buộc
 
-1. **2-3 câu, 40-80 từ.** Không dài hơn: đoạn chèn mà dài hơn đoạn gốc là lộ.
+1. **2-3 câu, 35-60 tiếng, mỗi câu ≤ 30 tiếng.** Không dài hơn: đoạn chèn mà dài hơn đoạn gốc là lộ.
+1b. **Giọng tự nhiên như đang nói với người đọc**, không phải văn báo cáo:
+   - Mỗi câu một ý. Không nối 2-3 vế bằng dấu chấm phẩy, gạch ngang, "và… nên… nhưng…".
+   - Không mở câu bằng "Tất nhiên", "Thực tế", "Có thể thấy", "Điểm dễ nhầm là", "Vì vậy" — vào thẳng ý.
+   - Dùng từ hằng ngày: "xem", "chọn", "cần" thay cho "tham khảo", "lựa chọn", "cần thiết"; "bố mẹ" thay "phụ huynh" nếu bài gốc không dùng "phụ huynh".
+   - Không liệt kê kiểu "pin, phanh, đèn và chế độ bảo hành" quá 3 món.
+   - Đọc to lên thấy giống câu người viết bài gốc sẽ viết thì mới đạt.
 2. **Câu 1 nối tiếp ý của đoạn `doan` vừa đọc** — nhắc lại một chi tiết/ý trong đó (không chép nguyên câu), rồi mở ra vấn đề mà bài đích giải quyết.
 3. **Câu 2 (hoặc 3) chứa anchor** — anchor nằm **giữa câu**, không mở đầu câu, không đứng một mình cuối câu kiểu "xem thêm: anchor".
 4. **Anchor giữ nguyên từng chữ** trong sheet (cả dấu, cả thứ tự từ). Được thêm từ đệm quanh anchor cho xuôi câu ("bài **xe máy điện cho nam** dưới đây", "những mẫu **xe máy điện đẹp** tầm 20 triệu"), không được đổi chữ bên trong anchor. Anchor không hợp ngữ pháp cách nào cũng không xuôi → ghi chú đề xuất anchor khác, vẫn viết bằng anchor gốc.
@@ -48,12 +54,15 @@ Key: `xe máy điện cho học sinh cấp 3` — Anchor: `xe máy điện cho h
 
 Đoạn chèn:
 ```html
-<p>Quãng đường ngắn và ổn định như vậy cũng là lý do phụ huynh thường không cần chọn xe pin quá lớn. Thay vào đó, nên ưu tiên các mẫu <a href="https://osakar.com.vn/tin-tuc/xe-may-dien-cho-hoc-sinh-cap-3/">xe máy điện cho học sinh cấp 3</a> có trọng lượng nhẹ, tốc độ tối đa dưới 50 km/h để các em dễ điều khiển và đúng quy định không cần bằng lái.</p>
+<p>Đi gần như vậy thì không cần xe pin quá to. Bố mẹ nên ưu tiên các mẫu <a href="https://osakar.com.vn/tin-tuc/xe-may-dien-cho-hoc-sinh-cap-3/">xe máy điện cho học sinh cấp 3</a> nhẹ, tốc độ dưới 50 km/h để con dễ lái và không cần bằng.</p>
 ```
+
+Viết sai giọng (tránh): *"Quãng đường ngắn và ổn định như vậy cũng là lý do phụ huynh thường không cần chọn xe pin quá lớn. Thay vào đó, nên ưu tiên các mẫu … có trọng lượng nhẹ, tốc độ tối đa dưới 50 km/h để các em dễ điều khiển và đúng quy định không cần bằng lái."* — câu dài, nhiều vế, từ ngữ hành chính.
 
 ## Tự kiểm trước khi ghi
 
-- [ ] 2-3 câu, 40-80 từ?
+- [ ] 2-3 câu, 35-60 tiếng, không câu nào quá 30 tiếng?
+- [ ] Đọc lên nghe như người thường nói, không có vế nối chồng chất?
 - [ ] Anchor y nguyên chữ trong sheet, nằm giữa câu, có đúng 1 thẻ `<a>`?
 - [ ] Câu đầu có bám vào ý của đoạn trước không? (đọc lại `doan`)
 - [ ] Không có số liệu tự bịa, không từ cấm?
