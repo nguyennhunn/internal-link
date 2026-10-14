@@ -23,15 +23,16 @@ Agent **không** tự sửa bài trên website — người duyệt dán vào. A
 
 ## Cài đặt (làm 1 lần / người)
 
-1. Tải repo về máy:
+1. Tải repo về máy (mở Git Bash hoặc PowerShell ở thư mục muốn chứa, ví dụ `D:\`):
    ```bash
-   git clone https://github.com/<tài-khoản>/agent-internal-link.git
+   git clone https://github.com/nguyennhunn/internal-link.git
    ```
-2. Mở Claude Code **đúng trong thư mục `agent-internal-link`** (script gọi bằng đường dẫn tương đối, mở sai thư mục sẽ không chạy).
+   Lệnh này tạo thư mục `internal-link`.
+2. Mở Claude Code **đúng trong thư mục `internal-link`** vừa tải (script gọi bằng đường dẫn tương đối, mở sai thư mục sẽ không chạy).
 3. Copy `CLAUDE.md.example` → `.claude/CLAUDE.md`, sửa sheet-key, spreadsheet ID, tên dự án, quy tắc riêng.
 4. *(Tuỳ chọn, chỉ khi muốn agent ghi ngược lại sheet)* Kết nối Google Sheet — nói với Claude: **"kết nối sheet internal link"**. Claude dẫn từng bước:
    tạo OAuth Client ID (Desktop app, bật Google Sheets API, consent screen để *In production*), chạy lệnh `set-client` rồi `oauth`,
-   bấm Cho phép trên trình duyệt. Token lưu vào `sheets-accounts.local.json` — file này đã bị chặn commit.
+   bấm Cho phép trên trình duyệt (Google hiện "ứng dụng chưa xác minh" → bấm *Nâng cao* → *Đi tới agent-internal-link* — app nội bộ, không sao). Token lưu vào `sheets-accounts.local.json` — file này đã bị chặn commit.
 
 ## Sheet mẫu
 
@@ -58,8 +59,8 @@ Mở file HTML bằng trình duyệt: mỗi thẻ hiện *đoạn trước → �
 
 ## Chia sẻ cho team
 
-1. Repo để **Private**, mời đồng nghiệp: GitHub → Settings → Collaborators → Add people.
-2. Mỗi người tự làm mục *Cài đặt* trên máy mình. Client ID/Secret của Google có thể dùng chung (chủ repo gửi riêng, không commit); `refresh_token` là của từng người vì nó gắn với tài khoản Google của họ — họ cần quyền **Editor** trên sheet.
+1. Gửi link repo cho đồng nghiệp: `https://github.com/nguyennhunn/internal-link` (repo công khai, ai cũng tải được; muốn sửa code thì chủ repo mời vào Collaborators).
+2. Mỗi người tự làm mục *Cài đặt* trên máy mình. Client ID/Secret của Google dùng chung (chủ repo gửi riêng qua Zalo/email, **không** đưa lên GitHub); `refresh_token` là của từng người vì nó gắn với tài khoản Google của họ — họ cần quyền **Editor** trên sheet.
 3. Sửa quy tắc viết → sửa `.claude/skills/chen-internal-link/SKILL.md`, commit và push; người khác `git pull` là có bản mới.
 4. Sheet của dự án khác → thêm một sheet-key mới trong `sheets-accounts.local.json` và đổi `.claude/CLAUDE.md`.
 
