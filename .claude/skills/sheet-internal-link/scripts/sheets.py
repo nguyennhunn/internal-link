@@ -9,6 +9,7 @@ Lệnh:
   read-public <spreadsheet_id> <gid> <out.json>      # sheet chia sẻ công khai, KHÔNG cần OAuth, chỉ đọc
   update-cell <accounts.json> <key> <tab> <A1> <value>
   append-rows <accounts.json> <key> <tab> <rows.json>   # rows.json = [["a","b"],...]
+  insert-column <accounts.json> <key> <tab> <sau-cột> "<tiêu đề>"  # chèn 1 cột mới sau cột chữ cái đã cho
 
 Mọi lệnh tự refresh access_token bằng refresh_token đã lưu.
 """
@@ -225,6 +226,31 @@ def cmd_update_cell(path, key, tab, a1, value):
     print(f"đã ghi {r['updatedRange']}")
 
 
+def cmd_insert_column(path, key, tab, after_letter, header):
+    """Chèn 1 cột mới ngay SAU cột <after_letter> (vd L) và ghi tiêu đề vào dòng 1."""
+    tok, sid = token(path, key)
+    st, r = http("GET", f"{API}/{sid}?fields=sheets.properties(sheetId,title)", auth_headers(tok))
+    if st != 200:
+        die(f"{st}: {r}")
+    gid = next((s["properties"]["sheetId"] for s in r.get("sheets", []) if s["properties"]["title"] == tab), None)
+    if gid is None:
+        die(f"không thấy tab '{tab}'")
+    idx = 0
+    for ch in after_letter.upper():
+        idx = idx * 26 + (ord(ch) - 64)
+    body = {"requests": [{"insertDimension": {"range": {"sheetId": gid, "dimension": "COLUMNS", "startIndex": idx, "endIndex": idx + 1}, "inheritFromBefore": True}}]}
+    st, r = http("POST", f"{API}/{sid}:batchUpdate", auth_headers(tok), data=body)
+    if st != 200:
+        die(f"chèn cột thất bại {st}: {r.get('error', r)}")
+    new_letter = ""
+    n = idx + 1
+    while n:
+        n, rem = divmod(n - 1, 26)
+        new_letter = chr(65 + rem) + new_letter
+    cmd_update_cell(path, key, tab, f"{new_letter}1", header)
+    print(f"đã chèn cột {new_letter} '{header}' sau cột {after_letter.upper()}")
+
+
 def cmd_append_rows(path, key, tab, rows_file):
     tok, sid = token(path, key)
     with open(rows_file, encoding="utf-8") as f:
@@ -240,7 +266,8 @@ def cmd_append_rows(path, key, tab, rows_file):
 if __name__ == "__main__":
     cmds = {"set-client": cmd_set_client, "oauth": cmd_oauth, "tabs": cmd_tabs,
             "read": cmd_read, "read-public": cmd_read_public,
-            "update-cell": cmd_update_cell, "append-rows": cmd_append_rows}
+            "update-cell": cmd_update_cell, "append-rows": cmd_append_rows,
+            "insert-column": cmd_insert_column}
     if len(sys.argv) < 2 or sys.argv[1] not in cmds:
         print(__doc__)
         sys.exit(1)

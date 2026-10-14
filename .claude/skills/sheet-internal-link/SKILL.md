@@ -17,10 +17,11 @@ Tay đọc/ghi sổ cho agent `internal-link`. Mọi thao tác đi qua **một s
 | E, F, G | `Key mục tiêu 2` · `URL đích 2` · `Anchor text 2` | người — để trống nếu chỉ 1 link |
 | H, I, J | `Key mục tiêu 3` · `URL đích 3` · `Anchor text 3` | người — để trống nếu ≤ 2 link |
 | K | `Bài cần chèn` | người — URL bài sẽ chèn link vào |
-| L | `Đoạn cần chèn` | **agent** — nhiều link thì đánh số `[1]`, `[2]`, `[3]`, cách nhau một dòng trống |
-| M | `Vị trí chèn` | **agent** — đánh số tương ứng |
-| N | `Trạng thái` | agent ghi `Đã viết` (hoặc `Đã viết 2/3` khi có link bị bỏ qua); người sửa thành `Đã duyệt` / `Đã chèn` / `Bỏ qua` |
-| O | `Ghi chú` | agent — vd "[2] bài đã có link tới URL đích" |
+| L | `Đoạn cần chèn` | **agent** — HTML `<p>` có `<a>`, để dán vào bài; nhiều link thì đánh số `[1]`, `[2]`, `[3]`, cách nhau một dòng trống |
+| M | `Đoạn chèn (đọc duyệt)` | **agent** — cùng nội dung dạng chữ thường, anchor bọc «…», để người duyệt đọc. Sheet chưa có cột này → agent tự tạo bằng `insert-column` |
+| N | `Vị trí chèn` | **agent** — đánh số tương ứng |
+| O | `Trạng thái` | agent ghi `Đã viết` (hoặc `Đã viết 2/3` khi có link bị bỏ qua); người sửa thành `Đã duyệt` / `Đã chèn` / `Bỏ qua` |
+| P | `Ghi chú` | agent — vd "[2] bài đã có link tới URL đích" |
 
 Một bộ link được tính là **có** khi cả `URL đích n` và `Anchor text n` đều có chữ (`Key mục tiêu n` trống → dùng anchor làm key).
 Bộ có URL mà thiếu anchor (hoặc ngược lại) → không viết, ghi chú "[n] thiếu anchor/URL".
@@ -55,6 +56,7 @@ A=.claude/skills/sheet-internal-link/sheets-accounts.local.json
 python $S tabs $A <key>                                  # xem tên tab thật
 python $S read $A <key> "Internal link" .tmp/sheet.json  # đọc
 python $S update-cell $A <key> "Internal link" L5 "<p>...</p>"
+python $S insert-column $A <key> "Internal link" L "Đoạn chèn (đọc duyệt)"   # chèn cột mới ngay sau L (1 lần/sheet)
 ```
 
 Cả hai cách đều xuất JSON `{headers:[{index,text}], rows:[{rowIndex, values{header: text}}]}` (cách 1 có thêm `read_only: true`).

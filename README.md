@@ -37,10 +37,10 @@ Agent **không** tự sửa bài trên website — người duyệt dán vào. A
 
 **Tab `Internal link`** — mỗi hàng là **một bài cần chèn**, tối đa 3 link. Header dòng 1 đúng chữ:
 
-| STT | Key mục tiêu 1 | URL đích 1 | Anchor text 1 | Key mục tiêu 2 | URL đích 2 | Anchor text 2 | Key mục tiêu 3 | URL đích 3 | Anchor text 3 | Bài cần chèn | Đoạn cần chèn | Vị trí chèn | Trạng thái | Ghi chú |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| STT | Key mục tiêu 1 | URL đích 1 | Anchor text 1 | Key mục tiêu 2 | URL đích 2 | Anchor text 2 | Key mục tiêu 3 | URL đích 3 | Anchor text 3 | Bài cần chèn | Đoạn cần chèn | Đoạn chèn (đọc duyệt) | Vị trí chèn | Trạng thái | Ghi chú |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 
-Bạn điền các bộ (Key – URL đích – Anchor) và `Bài cần chèn`; chỉ 1 link thì để trống bộ 2, 3. Agent điền 4 cột cuối (nhiều link thì đánh số `[1]`, `[2]`, `[3]`). Duyệt xong bạn đổi `Trạng thái` thành `Đã chèn`.
+Bạn điền các bộ (Key – URL đích – Anchor) và `Bài cần chèn`; chỉ 1 link thì để trống bộ 2, 3. Agent điền 5 cột cuối (nhiều link thì đánh số `[1]`, `[2]`, `[3]`): *Đoạn cần chèn* là HTML để dán vào bài, *Đoạn chèn (đọc duyệt)* là bản chữ thường để đọc, anchor bọc «…». Cột đọc duyệt chưa có thì agent tự tạo. Duyệt xong bạn đổi `Trạng thái` thành `Đã chèn`.
 
 **Hai cách cho agent đọc sheet:**
 - *Chỉ đọc, không cần cài gì:* sheet để *Share → Anyone with the link → Viewer*, đưa link cho agent. Kết quả nằm trong trang HTML duyệt, agent không ghi được về sheet.

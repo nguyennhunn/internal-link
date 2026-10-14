@@ -25,7 +25,7 @@ mkdir -p .tmp
 
 1. **Đọc sheet.** Có `sheets-accounts.local.json` với sheet-key → `python $S read $A <key> "<tab>" .tmp/sheet.json` (chế độ đọc+ghi).
    Không có → `python $S read-public <spreadsheet_id> <gid> .tmp/sheet.json` (chế độ chỉ đọc; sheet phải chia sẻ công khai). Read file.
-   Kiểm tra header theo skill `sheet-internal-link` (`Bài cần chèn`, `URL đích 1`, `Anchor text 1`, `Đoạn cần chèn`, `Vị trí chèn`, `Trạng thái`, `Ghi chú`; bộ 2, 3 tuỳ chọn). Thiếu → báo tên header thật và dừng.
+   Kiểm tra header theo skill `sheet-internal-link` (`Bài cần chèn`, `URL đích 1`, `Anchor text 1`, `Đoạn cần chèn`, `Đoạn chèn (đọc duyệt)`, `Vị trí chèn`, `Trạng thái`, `Ghi chú`; bộ 2, 3 tuỳ chọn). Thiếu cột do người điền → báo tên header thật và dừng; thiếu riêng `Đoạn chèn (đọc duyệt)` → tự chèn cột (xem bước 3e).
 2. **Lọc hàng cần làm:** `Bài cần chèn` ≠ trống, ít nhất 1 bộ (URL đích n + Anchor text n) đủ, `Đoạn cần chèn` trống, `Trạng thái` ≠ `Bỏ qua`. Người dùng chỉ định hàng/STT cụ thể thì chỉ làm hàng đó. Không có hàng nào → báo và dừng.
 3. **Với từng hàng** (tuần tự):
    a. Gom các bộ link đủ thành `.tmp/yc-<row>.json` = `[{"stt":"1","key":..,"anchor":..,"url_dich":..}, ...]` (`stt` = số thứ tự bộ 1/2/3; key trống → dùng anchor). Bộ thiếu anchor hoặc URL → không đưa vào, nhớ để ghi chú "[n] thiếu anchor/URL".
@@ -34,6 +34,7 @@ mkdir -p .tmp
    d. Với từng phần tử trong `yeu_cau[]`: `da_co_link_toi_dich: true` → không viết, ghi chú "[n] bài đã có link tới URL đích trong câu văn". Còn lại: chọn ứng viên **nhãn "cuối mục"** (xem `vi_tri`; không bao giờ chọn "ĐẦU MỤC") và viết đoạn theo skill `chen-internal-link` (đọc SKILL.md của nó một lần đầu phiên). Áp dụng thêm quy tắc riêng trong CLAUDE.md. Ưu tiên `ung_vien[0]` vì script đã chia chỗ cách nhau ≥ 3 đoạn; tự đổi ứng viên thì phải giữ khoảng cách đó và vẫn là cuối mục. Các đoạn cùng bài đứng độc lập, không nhắc tới nhau, không mở đầu giống nhau. `canh_bao` khác rỗng → thêm vào ghi chú.
    e. **Ghi về sheet** (chỉ khi chế độ đọc+ghi; chế độ chỉ đọc thì bỏ qua bước này), dùng đúng `rowIndex` và chữ cột suy từ `headers[].index`:
       - `Đoạn cần chèn` = 1 link: `<p>…</p>`; nhiều link: `[1] <p>…</p>` + dòng trống + `[2] <p>…</p>` …
+      - `Đoạn chèn (đọc duyệt)` = cùng nội dung nhưng chữ thường, bỏ mọi thẻ HTML, anchor bọc trong «…» để người duyệt thấy chỗ nào là link; đánh số [1] [2] như trên. Cột này không có trong sheet → tạo bằng `python $S insert-column $A <key> "<tab>" <cột Đoạn cần chèn> "Đoạn chèn (đọc duyệt)"` rồi đọc lại sheet.
       - `Vị trí chèn` = mỗi link một dòng, theo mẫu của skill `chen-internal-link`: `[1] Cuối mục "<heading>" — sau đoạn "…" (hoặc: sau danh sách), ngay trước <H2/H3 kế>`
       - `Trạng thái` = `Đã viết` (đủ) hoặc `Đã viết 2/3`
       - `Ghi chú` = các ghi chú `[n] …` nếu có
