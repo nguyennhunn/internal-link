@@ -31,13 +31,13 @@ mkdir -p .tmp
    a. Gom các bộ link đủ thành `.tmp/yc-<row>.json` = `[{"stt":"1","key":..,"anchor":..,"url_dich":..}, ...]` (`stt` = số thứ tự bộ 1/2/3; key trống → dùng anchor). Bộ thiếu anchor hoặc URL → không đưa vào, nhớ để ghi chú "[n] thiếu anchor/URL".
    b. `python $D chuan-bi-nhieu "<Bài cần chèn>" .tmp/yc-<row>.json .tmp/bai-<row>.json` → Read file. (1 bộ cũng dùng lệnh này cho thống nhất.)
    c. Tải lỗi (403/timeout) → `Trạng thái = Lỗi`, `Ghi chú = "Không tải được bài: <lý do ngắn>"`, sang hàng kế.
-   d. Với từng phần tử trong `yeu_cau[]`: `da_co_link_toi_dich: true` → không viết, ghi chú "[n] bài đã có link tới URL đích". Còn lại: chọn ứng viên và viết đoạn theo skill `chen-internal-link` (đọc SKILL.md của nó một lần đầu phiên). Áp dụng thêm quy tắc riêng trong CLAUDE.md. Ưu tiên `ung_vien[0]` vì script đã chia chỗ cách nhau ≥ 3 đoạn; tự đổi ứng viên thì phải giữ khoảng cách đó. Các đoạn cùng bài đứng độc lập, không nhắc tới nhau, không mở đầu giống nhau. `canh_bao` khác rỗng → thêm vào ghi chú.
+   d. Với từng phần tử trong `yeu_cau[]`: `da_co_link_toi_dich: true` → không viết, ghi chú "[n] bài đã có link tới URL đích trong câu văn". Còn lại: chọn ứng viên **nhãn "cuối mục"** (xem `vi_tri`; không bao giờ chọn "ĐẦU MỤC") và viết đoạn theo skill `chen-internal-link` (đọc SKILL.md của nó một lần đầu phiên). Áp dụng thêm quy tắc riêng trong CLAUDE.md. Ưu tiên `ung_vien[0]` vì script đã chia chỗ cách nhau ≥ 3 đoạn; tự đổi ứng viên thì phải giữ khoảng cách đó và vẫn là cuối mục. Các đoạn cùng bài đứng độc lập, không nhắc tới nhau, không mở đầu giống nhau. `canh_bao` khác rỗng → thêm vào ghi chú.
    e. **Ghi về sheet** (chỉ khi chế độ đọc+ghi; chế độ chỉ đọc thì bỏ qua bước này), dùng đúng `rowIndex` và chữ cột suy từ `headers[].index`:
       - `Đoạn cần chèn` = 1 link: `<p>…</p>`; nhiều link: `[1] <p>…</p>` + dòng trống + `[2] <p>…</p>` …
-      - `Vị trí chèn` = `[1] Sau đoạn bắt đầu bằng: "…" (mục: …)` mỗi link một dòng
+      - `Vị trí chèn` = mỗi link một dòng, theo mẫu của skill `chen-internal-link`: `[1] Cuối mục "<heading>" — sau đoạn "…" (hoặc: sau danh sách), ngay trước <H2/H3 kế>`
       - `Trạng thái` = `Đã viết` (đủ) hoặc `Đã viết 2/3`
       - `Ghi chú` = các ghi chú `[n] …` nếu có
-   f. Thêm vào `.tmp/ket-qua.json` **một phần tử cho mỗi link** theo định dạng skill `xuat-duyet` (`stt` = "<hàng>.<n>", kèm `doan`, `sau`, `muc`, `vi_tri` dạng "đoạn 8/82" từ ứng viên đã chọn).
+   f. Thêm vào `.tmp/ket-qua.json` **một phần tử cho mỗi link** theo định dạng skill `xuat-duyet` (`stt` = "<hàng>.<n>", kèm `doan`, `sau`, `muc`, `vi_tri` như đã ghi sheet, và `thu_tu` = chỉ số `i` của ứng viên để trang duyệt xếp đúng thứ tự trong bài).
 4. **Xuất trang duyệt:** `python .claude/skills/xuat-duyet/scripts/xuat_duyet.py .tmp/ket-qua.json duyet-internal-link-<YYYY-MM-DD>.html "<Tên dự án>"` rồi SendUserFile.
 5. **Báo cáo ngắn:** số bài / số link đã viết, bỏ qua, lỗi; link nào cần xem kỹ (ghi chú). Chế độ chỉ đọc → nhắc: "Sheet chưa nối OAuth nên mình không ghi được vào sheet; mọi thứ nằm trong trang duyệt." Chế độ đọc+ghi → nhắc: "Duyệt xong sửa cột Trạng thái thành *Đã chèn* để lần sau agent không đụng lại."
 

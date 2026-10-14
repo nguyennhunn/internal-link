@@ -32,6 +32,8 @@ def main(inp, out, ten="Dự án"):
             logo = "data:image/png;base64," + base64.b64encode(f.read()).decode()
     # các đoạn cùng một bài đứng cạnh nhau, theo thứ tự xuất hiện trong bài (vi_tri "đoạn 8/82")
     def order(i):
+        if i.get("thu_tu") is not None:
+            return (i.get("bai") or "", int(i["thu_tu"]))
         m = re.search(r"đoạn (\d+)", i.get("vi_tri") or "")
         return (i.get("bai") or "", int(m.group(1)) if m else 10**6)
     items.sort(key=order)

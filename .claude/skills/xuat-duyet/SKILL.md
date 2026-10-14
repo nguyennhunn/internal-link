@@ -14,7 +14,7 @@ description: Xuất trang HTML (nhận diện SEONGON) để người duyệt xe
  "bai":"https://...","bai_tieu_de":"H1 bài cần chèn","muc":"H2 chứa đoạn",
  "doan":"đoạn gốc đứng trước","sau":"đoạn gốc đứng sau",
  "doan_html":"<p>... <a href=\"...\">...</a> ...</p>",
- "vi_tri":"Sau đoạn bắt đầu bằng: \"...\"","trang_thai":"Đã viết","ghi_chu":""}
+ "vi_tri":"Cuối mục \"...\" — sau đoạn \"...\", ngay trước H3 x.y","thu_tu":38,"trang_thai":"Đã viết","ghi_chu":""}
 ```
 
 2. ```
@@ -26,7 +26,7 @@ File HTML để ở thư mục gốc dự án (không phải `.tmp/`) để ngư
 
 ## Trang xuất ra có gì
 
-- Mỗi dòng một thẻ: key mục tiêu, bài cần chèn, URL đích, trạng thái.
+- Mỗi link một thẻ: key mục tiêu, bài cần chèn, URL đích, trạng thái. Các thẻ cùng bài xếp theo `thu_tu` (chỉ số khối trong bài).
 - Đoạn gốc phía trước (xám) → **đoạn chèn (khung xanh)** → đoạn gốc phía sau (xám): người duyệt thấy ngay có xuôi không.
 - Nút *Sao chép HTML* (dán vào trình soạn thảo chế độ HTML/Code) và *Sao chép chữ thường* (dán vào trình soạn thảo thường rồi tự gắn link).
 - Dòng `Bỏ qua` hiện mờ kèm lý do.
