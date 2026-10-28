@@ -41,6 +41,9 @@ Nếu biết bài đích nói gì (URL đủ rõ nghĩa, hoặc đã `doc_bai.py
 ## C. Nội dung và anchor
 
 11. **Câu 1 nối tiếp ý cuối của mục** (đoạn văn cuối hoặc danh sách cuối) — nhắc lại một chi tiết trong đó, không chép nguyên câu, rồi mở ra vấn đề mà bài đích giải quyết.
+11b. **Không "mời đọc bài" khô** — người dùng yêu cầu (28/10/2026). Cấm khuôn câu chỉ là lời mời gắn anchor: "đọc bài **anchor** để biết thêm", "tham khảo bài **anchor**", "xem thêm **anchor**", "bài **anchor** sẽ giúp bạn…" mà không có ý nối. Câu chứa anchor phải **nói một điều có nghĩa về chính nội dung** (một nhu cầu, một tình huống, một tiêu chí) và anchor là phần tự nhiên của câu đó. Mỗi câu phải đủ chủ ngữ – vị ngữ, không cụt ngủn, đọc một lần hiểu ngay, và phải **bám vào nội dung ngay trước hoặc ngay sau chỗ chèn** (nhắc được chi tiết cụ thể của đoạn đó).
+    ✘ *"Để có thêm cơ sở lựa chọn, bạn có thể tham khảo bài đánh giá **xe điện nào tốt nhất hiện nay**."* — chỉ là lời mời, không nối với thông số Nispa Viora vừa nêu.
+    ✔ *"Nếu smartkey và cổng sạc USB là thứ bạn cần hằng ngày, Nispa Viora đang nằm trong nhóm **xe điện nào tốt nhất hiện nay** xét về tiện ích ở tầm giá này."* — câu nói về chính chiếc xe, anchor là một phần của nhận xét.
 12. **Anchor nằm giữa câu** (câu 2 hoặc 3), không mở đầu câu, không đứng một mình cuối câu kiểu "xem thêm: anchor".
 13. **Anchor giữ nguyên từng chữ** trong sheet (dấu, thứ tự từ). Được thêm từ đệm quanh anchor cho xuôi ("các mẫu **xe máy điện cho dân công sở** có dáng tương tự"), không đổi chữ bên trong. Anchor không xuôi cách nào → vẫn dùng nguyên, ghi đề xuất anchor khác vào Ghi chú.
 14. **Câu chứa anchor phải tự đủ nghĩa khi bỏ link**: nói rõ anchor là *gì* (danh sách mẫu, bài so sánh, hướng dẫn chọn…). **Cấm trỏ mơ hồ**: "bài này", "bài viết dưới đây", "ở đây", "tại đây", "click vào đây", "xem thêm tại".
@@ -86,3 +89,4 @@ Sai giọng (tránh): *"Thực tế nhiều gia đình mua Mandi Plus S còn đ�
 - [ ] Anchor y nguyên, nằm giữa câu, đúng 1 thẻ `<a>`, câu tự đủ nghĩa khi bỏ link, không "bài này/dưới đây"?
 - [ ] Không hạ thương hiệu chủ web?
 - [ ] Câu đầu bám vào ý cuối mục? Không bịa số liệu, không từ cấm, xưng hô khớp bài?
+- [ ] Câu chứa anchor có nói một điều có nghĩa về nội dung, hay chỉ là "đọc bài/tham khảo bài + anchor"? Có nhắc được chi tiết cụ thể của đoạn ngay trước/sau không?

@@ -5,12 +5,19 @@ Lệnh:
   set-client  <accounts.json> <key> <client_id> <client_secret> <spreadsheet_id>
   oauth       <accounts.json> <key> [port]           # lần đầu: mở trình duyệt, lưu refresh_token
   tabs        <accounts.json> <key>                  # liệt kê tên tab thật
-  read        <accounts.json> <key> <tab> <out.json> # header (kèm hyperlink) + rows
+  read        <accounts.json> <key> <tab> <out.json> # tự tìm dòng tiêu đề; header (kèm chữ cột, cột ô tick) + rows
   read-public <spreadsheet_id> <gid> <out.json>      # sheet chia sẻ công khai, KHÔNG cần OAuth, chỉ đọc
-  update-cell <accounts.json> <key> <tab> <A1> <value>
+  write-rows  <accounts.json> <key> <tab> <changes.json> [--thu]
+      # CÁCH GHI CHÍNH. changes.json = [{"rowIndex":5, "expect":{"Bài cần chèn":"https://..."},
+      #   "set":{"Đoạn cần chèn":"<p>…</p>", "Anchor text 1":{"text":"…","link":"https://…"}, "URL đích 3":""}}]
+      # Tìm cột theo TÊN header; sao lưu ô cũ vào .tmp/sao-luu/; bỏ qua hàng mà `expect` không khớp
+      # (sheet bị sửa/chèn dòng trong lúc agent chạy); KHÔNG ghi chữ vào cột ô tick. --thu = chỉ in, không ghi.
+  restore     <accounts.json> <key> <backup.json>    # trả lại các ô đã ghi từ file sao lưu của write-rows
+  update-cell <accounts.json> <key> <tab> <A1> <value>   # ghi 1 ô theo địa chỉ — chỉ dùng khi thật cần
   append-rows <accounts.json> <key> <tab> <rows.json>   # rows.json = [["a","b"],...]
   insert-column <accounts.json> <key> <tab> <sau-cột> "<tiêu đề>"  # chèn 1 cột mới sau cột chữ cái đã cho
 
+Dòng tiêu đề = dòng đầu tiên (trong 10 dòng đầu) có ô "Bài cần chèn" — người dùng có thể chèn dòng ghi chú phía trên.
 Mọi lệnh tự refresh access_token bằng refresh_token đã lưu.
 """
 import json
@@ -161,9 +168,27 @@ def cell_text(c):
     return (c or {}).get("formattedValue", "") or ""
 
 
-def cmd_read(path, key, tab, out):
-    tok, sid = token(path, key)
-    fields = "sheets(properties(title),data(rowData(values(formattedValue,hyperlink,userEnteredValue))))"
+HEADER_MOC = "Bài cần chèn"  # ô dùng để nhận ra dòng tiêu đề
+
+
+def col_letter(idx):
+    s, n = "", idx + 1
+    while n:
+        n, rem = divmod(n - 1, 26)
+        s = chr(65 + rem) + s
+    return s
+
+
+def find_header_row(rows_text):
+    """rows_text = list các dòng (list chữ). Trả về chỉ số 0-based của dòng tiêu đề."""
+    for k, row in enumerate(rows_text[:10]):
+        if any(t.strip() == HEADER_MOC for t in row):
+            return k
+    return 0
+
+
+def load_grid(tok, sid, tab):
+    fields = "sheets(properties(title,sheetId),data(rowData(values(formattedValue,hyperlink,userEnteredValue,dataValidation.condition.type))))"
     url = f"{API}/{sid}?" + urllib.parse.urlencode({"ranges": a1_tab(tab), "fields": fields})
     st, r = http("GET", url, auth_headers(tok))
     if st != 200:
@@ -172,23 +197,127 @@ def cmd_read(path, key, tab, out):
     rows_raw = ((sheet.get("data") or [{}])[0]).get("rowData") or []
     if not rows_raw:
         die("tab trống hoặc sai tên tab — chạy `tabs` để xem tên thật")
-    hdr = rows_raw[0].get("values", [])
-    headers = [{"index": i, "text": cell_text(c).strip(), "hyperlink": (c or {}).get("hyperlink")} for i, c in enumerate(hdr)]
+    return sheet.get("properties", {}), rows_raw
+
+
+def parse_grid(rows_raw):
+    texts = [[cell_text(c) for c in rr.get("values", [])] for rr in rows_raw]
+    h = find_header_row(texts)
+    hdr = rows_raw[h].get("values", [])
+    headers = [{"index": i, "cot": col_letter(i), "text": cell_text(c).strip()} for i, c in enumerate(hdr)]
+    # cột ô tick: phần lớn ô dữ liệu có kiểm tra dữ liệu kiểu BOOLEAN → không bao giờ ghi chữ vào
+    for hd in headers:
+        n_tick = n_all = 0
+        for rr in rows_raw[h + 1:h + 41]:
+            cells = rr.get("values", [])
+            c = cells[hd["index"]] if hd["index"] < len(cells) else {}
+            if c:
+                n_all += 1
+                n_tick += (c.get("dataValidation", {}).get("condition", {}).get("type") == "BOOLEAN")
+        hd["o_tick"] = n_all > 0 and n_tick * 2 >= n_all
     rows = []
-    for i, rr in enumerate(rows_raw[1:], start=2):
+    for k, rr in enumerate(rows_raw[h + 1:], start=h + 2):
         cells = rr.get("values", [])
         vals, links = {}, {}
-        for h in headers:
-            if not h["text"]:
+        for hd in headers:
+            if not hd["text"]:
                 continue
-            c = cells[h["index"]] if h["index"] < len(cells) else None
-            vals[h["text"]] = cell_text(c).strip()
+            c = cells[hd["index"]] if hd["index"] < len(cells) else None
+            vals[hd["text"]] = cell_text(c).strip()
             if c and c.get("hyperlink"):
-                links[h["text"]] = c["hyperlink"]
-        if any(vals.values()):
-            rows.append({"rowIndex": i, "values": vals, "hyperlinks": links})
-    save(out, {"tab": sheet.get("properties", {}).get("title", tab), "headers": headers, "rows": rows})
-    print(f"đã đọc tab '{tab}': {len(headers)} cột, {len(rows)} dòng → {out}")
+                links[hd["text"]] = c["hyperlink"]
+        if any(v for kk, v in vals.items() if not next(x for x in headers if x["text"] == kk)["o_tick"]):
+            rows.append({"rowIndex": k, "values": vals, "hyperlinks": links})
+    return h + 1, headers, rows
+
+
+def cmd_read(path, key, tab, out):
+    tok, sid = token(path, key)
+    props, rows_raw = load_grid(tok, sid, tab)
+    header_row, headers, rows = parse_grid(rows_raw)
+    save(out, {"tab": props.get("title", tab), "header_row": header_row, "headers": headers, "rows": rows})
+    tick = [h["text"] for h in headers if h["o_tick"]]
+    print(f"đã đọc tab '{tab}': tiêu đề ở dòng {header_row}, {len(headers)} cột, {len(rows)} dòng → {out}"
+          + (f" | cột ô tick (không ghi chữ): {', '.join(tick)}" if tick else ""))
+
+
+def cmd_write_rows(path, key, tab, changes_file, *flags):
+    """Ghi theo TÊN cột, có kiểm `expect`, sao lưu, không ghi chữ vào cột ô tick."""
+    thu = "--thu" in flags
+    with open(changes_file, encoding="utf-8") as f:
+        changes = json.load(f)
+    tok, sid = token(path, key)
+    props, rows_raw = load_grid(tok, sid, tab)
+    header_row, headers, _ = parse_grid(rows_raw)
+    by_name = {h["text"]: h for h in headers if h["text"]}
+
+    def cur(row_idx, col_idx):
+        k = row_idx - 1
+        cells = rows_raw[k].get("values", []) if k < len(rows_raw) else []
+        return cells[col_idx] if col_idx < len(cells) else {}
+
+    reqs, backup, skipped, n_cells = [], [], [], 0
+    for ch in changes:
+        r = int(ch["rowIndex"])
+        if r <= header_row:
+            skipped.append((r, "hàng nằm trên/trùng dòng tiêu đề")); continue
+        bad = [k for k in list(ch.get("set", {})) + list(ch.get("expect", {})) if k not in by_name]
+        if bad:
+            skipped.append((r, f"không có cột {bad}")); continue
+        lech = [k for k, v in ch.get("expect", {}).items() if cell_text(cur(r, by_name[k]["index"])).strip() != str(v).strip()]
+        if lech:
+            skipped.append((r, f"ô hiện tại khác kỳ vọng ở cột {lech} — sheet đã đổi, không ghi")); continue
+        for name, v in ch.get("set", {}).items():
+            hd = by_name[name]
+            if hd["o_tick"]:
+                skipped.append((r, f"cột '{name}' là ô tick — bỏ qua, không ghi chữ")); continue
+            old = cur(r, hd["index"])
+            backup.append({"rowIndex": r, "cot": hd["cot"], "header": name, "cu": cell_text(old), "cu_link": old.get("hyperlink")})
+            if isinstance(v, dict):
+                cell = {"userEnteredValue": {"stringValue": v.get("text", "")}}
+                if v.get("link"):
+                    cell["textFormatRuns"] = [{"startIndex": 0, "format": {"link": {"uri": v["link"]}}}]
+            else:
+                cell = {"userEnteredValue": {"stringValue": str(v)}} if str(v) != "" else {}
+            reqs.append({"updateCells": {"range": {"sheetId": props["sheetId"], "startRowIndex": r - 1, "endRowIndex": r,
+                                                   "startColumnIndex": hd["index"], "endColumnIndex": hd["index"] + 1},
+                                         "rows": [{"values": [cell]}], "fields": "userEnteredValue,textFormatRuns"}})
+            n_cells += 1
+    for r, why in skipped:
+        print(f"  BỎ QUA hàng {r}: {why}")
+    print(f"{'(thử) ' if thu else ''}{n_cells} ô sẽ ghi, {len({c['rowIndex'] for c in backup})} hàng; {len(skipped)} cảnh báo")
+    if thu or not reqs:
+        return
+    import os
+    os.makedirs(".tmp/sao-luu", exist_ok=True)
+    bk = f".tmp/sao-luu/{key}-{time.strftime('%Y%m%d-%H%M%S')}.json"
+    save(bk, {"tab": props.get("title", tab), "sheetId": props["sheetId"], "o": backup})
+    for k in range(0, len(reqs), 500):
+        st, res = http("POST", f"{API}/{sid}:batchUpdate", auth_headers(tok), data={"requests": reqs[k:k + 500]})
+        if st != 200:
+            die(f"ghi thất bại {st}: {res.get('error', res)} — các ô ghi trước đó đã sao lưu ở {bk}")
+    print(f"đã ghi {n_cells} ô — sao lưu ô cũ: {bk} (khôi phục: restore {path} {key} {bk})")
+
+
+def cmd_restore(path, key, backup_file):
+    with open(backup_file, encoding="utf-8") as f:
+        bk = json.load(f)
+    tok, sid = token(path, key)
+    reqs = []
+    for o in bk["o"]:
+        idx = 0
+        for ch in o["cot"]:
+            idx = idx * 26 + (ord(ch) - 64)
+        cell = {"userEnteredValue": {"stringValue": o["cu"]}} if o["cu"] else {}
+        if o["cu"] and o.get("cu_link"):
+            cell["textFormatRuns"] = [{"startIndex": 0, "format": {"link": {"uri": o["cu_link"]}}}]
+        reqs.append({"updateCells": {"range": {"sheetId": bk["sheetId"], "startRowIndex": o["rowIndex"] - 1, "endRowIndex": o["rowIndex"],
+                                               "startColumnIndex": idx - 1, "endColumnIndex": idx},
+                                     "rows": [{"values": [cell]}], "fields": "userEnteredValue,textFormatRuns"}})
+    st, r = http("POST", f"{API}/{sid}:batchUpdate", auth_headers(tok), data={"requests": reqs})
+    if st != 200:
+        die(f"khôi phục thất bại {st}: {r.get('error', r)}")
+    print(f"đã khôi phục {len(reqs)} ô từ {backup_file}")
 
 
 def cmd_read_public(spreadsheet_id, gid, out):
@@ -206,13 +335,14 @@ def cmd_read_public(spreadsheet_id, gid, out):
     data = list(csv.reader(io.StringIO(raw)))
     if not data:
         die("sheet trống")
-    headers = [{"index": i, "text": h.strip(), "hyperlink": None} for i, h in enumerate(data[0])]
+    h0 = find_header_row(data)
+    headers = [{"index": i, "cot": col_letter(i), "text": h.strip(), "o_tick": False} for i, h in enumerate(data[h0])]
     rows = []
-    for i, r in enumerate(data[1:], start=2):
+    for i, r in enumerate(data[h0 + 1:], start=h0 + 2):
         vals = {h["text"]: (r[h["index"]].strip() if h["index"] < len(r) else "") for h in headers if h["text"]}
-        if any(vals.values()):
+        if any(v for v in vals.values() if v not in ("TRUE", "FALSE")):
             rows.append({"rowIndex": i, "values": vals, "hyperlinks": {}})
-    save(out, {"tab": f"gid={gid}", "headers": headers, "rows": rows, "read_only": True})
+    save(out, {"tab": f"gid={gid}", "header_row": h0 + 1, "headers": headers, "rows": rows, "read_only": True})
     print(f"đã đọc sheet công khai gid={gid}: {len(headers)} cột, {len(rows)} dòng (chỉ đọc) → {out}")
 
 
@@ -242,12 +372,10 @@ def cmd_insert_column(path, key, tab, after_letter, header):
     st, r = http("POST", f"{API}/{sid}:batchUpdate", auth_headers(tok), data=body)
     if st != 200:
         die(f"chèn cột thất bại {st}: {r.get('error', r)}")
-    new_letter = ""
-    n = idx + 1
-    while n:
-        n, rem = divmod(n - 1, 26)
-        new_letter = chr(65 + rem) + new_letter
-    cmd_update_cell(path, key, tab, f"{new_letter}1", header)
+    new_letter = col_letter(idx)
+    _, rows_raw = load_grid(tok, sid, tab)
+    header_row = find_header_row([[cell_text(c) for c in rr.get("values", [])] for rr in rows_raw]) + 1
+    cmd_update_cell(path, key, tab, f"{new_letter}{header_row}", header)
     print(f"đã chèn cột {new_letter} '{header}' sau cột {after_letter.upper()}")
 
 
@@ -266,6 +394,7 @@ def cmd_append_rows(path, key, tab, rows_file):
 if __name__ == "__main__":
     cmds = {"set-client": cmd_set_client, "oauth": cmd_oauth, "tabs": cmd_tabs,
             "read": cmd_read, "read-public": cmd_read_public,
+            "write-rows": cmd_write_rows, "restore": cmd_restore,
             "update-cell": cmd_update_cell, "append-rows": cmd_append_rows,
             "insert-column": cmd_insert_column}
     if len(sys.argv) < 2 or sys.argv[1] not in cmds:

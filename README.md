@@ -2,7 +2,7 @@
 
 Bạn điền vào Google Sheet: **bài cần chèn – anchor text – URL đích**. Agent tự **đọc bài**, tìm **đoạn hợp nghĩa nhất**,
 **viết 2-3 câu** chứa anchor sao cho khớp ngữ cảnh, ghi lại vào sheet và xuất **trang HTML để duyệt** (có nút sao chép).
-Agent chỉ làm việc theo **key mục tiêu đã có sẵn** — việc lập kế hoạch link theo cụm từ khoá chính/phụ thuộc agent khác.
+Nếu sheet chưa có mô hình (chỉ có bảng *anchor + số lần cần chèn* và danh sách bài), agent **lên mô hình theo nội dung bài**: quét link sẵn có, chấm độ hợp từng cặp bài × anchor, đo xem đủ chỗ chèn tự nhiên không và **hỏi bạn trước khi xếp** nếu thiếu. Việc lập kế hoạch link theo cụm từ khoá chính/phụ vẫn thuộc agent khác.
 
 Agent **không** tự sửa bài trên website — người duyệt dán vào. An toàn cho mọi dự án.
 
@@ -10,10 +10,12 @@ Agent **không** tự sửa bài trên website — người duyệt dán vào. A
 
 | Thành phần | Vai trò |
 |---|---|
-| `agent: internal-link` | Điều phối: đọc sheet → từng dòng → gọi các skill → ghi sheet → xuất trang duyệt |
-| `skill: sheet-internal-link` | Đọc/ghi Google Sheet (Python thuần, không cần cài thêm gì) |
-| `skill: doc-bai` | Tải bài, tách đoạn, chấm điểm đoạn hợp nghĩa, kiểm tra bài đã có link chưa |
+| `agent: internal-link` | Điều phối: (lên mô hình) → đọc sheet → từng dòng → viết → tự rà → ghi sheet → xuất trang duyệt |
+| `skill: len-mo-hinh` | Lên mô hình theo nội dung bài: quét, chấm độ hợp, đo sức chứa, xếp anchor, ghi cột Key/URL/Anchor |
+| `skill: sheet-internal-link` | Đọc/ghi Google Sheet (Python thuần): tự tìm dòng tiêu đề, ghi theo tên cột, sao lưu, không ghi vào cột ô tick |
+| `skill: doc-bai` | Tải bài, nhận diện cấu trúc (danh sách, bảng, FAQ, khối sản phẩm, kết bài), chọn chỗ cuối mục, kiểm tra link sẵn có và chuyển hướng |
 | `skill: chen-internal-link` | Quy tắc viết đoạn 2-3 câu chứa anchor |
+| `skill: ra-doan-chen` | Tự rà trước khi ghi: máy kiểm + rà theo 6 lỗi, chỉ ghi đoạn đạt, gắn cờ KHÓ NỐI |
 | `skill: xuat-duyet` | Trang HTML duyệt theo nhận diện SEONGON |
 
 ## Yêu cầu
@@ -36,7 +38,7 @@ Agent **không** tự sửa bài trên website — người duyệt dán vào. A
 
 ## Sheet mẫu
 
-**Tab `Internal link`** — mỗi hàng là **một bài cần chèn**, tối đa 3 link. Header dòng 1 đúng chữ:
+**Tab `Internal link`** — mỗi hàng là **một bài cần chèn**, tối đa 3 link. Header đúng chữ (dòng 1, hoặc thấp hơn nếu bạn chèn dòng ghi chú phía trên — agent tự tìm):
 
 | STT | Key mục tiêu 1 | URL đích 1 | Anchor text 1 | Key mục tiêu 2 | URL đích 2 | Anchor text 2 | Key mục tiêu 3 | URL đích 3 | Anchor text 3 | Bài cần chèn | Đoạn cần chèn | Đoạn chèn (đọc duyệt) | Vị trí chèn | Trạng thái | Ghi chú |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
@@ -54,6 +56,8 @@ Trong Claude Code, nói:
 - **"chạy agent internal link"** → viết đoạn cho mọi hàng chưa có `Đoạn cần chèn`, xuất `duyet-internal-link-<ngày>.html`.
 - **"chạy internal link hàng 3, 5"** → chỉ làm các hàng đó.
 - **"viết lại hàng 4"** → viết lại một hàng đã có.
+- **"lên mô hình internal link"** + bảng anchor/số lần → agent quét, chấm, báo đủ/thiếu chỗ, chờ bạn chọn rồi mới ghi cột Key/URL/Anchor.
+- Ghi nhầm? **"khôi phục lần ghi vừa rồi"** → agent dùng file sao lưu trong `.tmp/sao-luu/`.
 
 Mở file HTML bằng trình duyệt: mỗi thẻ hiện *đoạn trước → đoạn chèn (khung xanh) → đoạn sau*, bấm **Sao chép HTML** rồi dán vào bài ở chế độ soạn thảo HTML/Code.
 
