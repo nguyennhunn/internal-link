@@ -4,6 +4,7 @@
       "Bash(python .claude/skills/sheet-internal-link/scripts/sheets.py *)",
       "Bash(python .claude/skills/doc-bai/scripts/doc_bai.py *)",
       "Bash(python .claude/skills/xuat-duyet/scripts/xuat_duyet.py *)",
+      "Bash(python .claude/skills/mo-hinh-3-den-3-di/scripts/ba_den_ba_di.py *)",
       "Bash(python .claude/skills/len-mo-hinh/scripts/mo_hinh.py *)",
       "Bash(python .claude/skills/ra-doan-chen/scripts/kiem_doan.py *)",
       "Bash(mkdir -p .tmp)",

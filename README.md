@@ -11,6 +11,7 @@ Agent **không** tự sửa bài trên website — người duyệt dán vào. A
 | Thành phần | Vai trò |
 |---|---|
 | `agent: internal-link` | Điều phối: (lên mô hình) → đọc sheet → từng dòng → viết → tự rà → ghi sheet → xuất trang duyệt |
+| `skill: mo-hinh-3-den-3-di` | Mô hình chuẩn SEONGON: bài i đi 3 link tới i+1 (key chính), i+2 (key phụ chưa TOP), i+3 (title), quay vòng cuối nhóm; điền cột Inlink 1-3 và sinh hàng cho tab Internal link |
 | `skill: len-mo-hinh` | Lên mô hình theo nội dung bài: quét, chấm độ hợp, đo sức chứa, xếp anchor, ghi cột Key/URL/Anchor |
 | `skill: sheet-internal-link` | Đọc/ghi Google Sheet (Python thuần): tự tìm dòng tiêu đề, ghi theo tên cột, sao lưu, không ghi vào cột ô tick |
 | `skill: doc-bai` | Tải bài, nhận diện cấu trúc (danh sách, bảng, FAQ, khối sản phẩm, kết bài), chọn chỗ cuối mục, kiểm tra link sẵn có và chuyển hướng |
@@ -56,6 +57,7 @@ Trong Claude Code, nói:
 - **"chạy agent internal link"** → viết đoạn cho mọi hàng chưa có `Đoạn cần chèn`, xuất `duyet-internal-link-<ngày>.html`.
 - **"chạy internal link hàng 3, 5"** → chỉ làm các hàng đó.
 - **"viết lại hàng 4"** → viết lại một hàng đã có.
+- **"lên mô hình 3 đến 3 đi cho nhóm …"** → điền cột Mô hình / Inlink 1-3 theo chuẩn SEONGON rồi sinh hàng Internal link.
 - **"lên mô hình internal link"** + bảng anchor/số lần → agent quét, chấm, báo đủ/thiếu chỗ, chờ bạn chọn rồi mới ghi cột Key/URL/Anchor.
 - Ghi nhầm? **"khôi phục lần ghi vừa rồi"** → agent dùng file sao lưu trong `.tmp/sao-luu/`.
 

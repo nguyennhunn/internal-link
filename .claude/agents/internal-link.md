@@ -24,6 +24,8 @@ Chạy nhiều agent con song song → mỗi con một thư mục nháp riêng (
 
 ## Quy trình
 
+Người dùng đưa sheet có cột `STT / Nhóm / Từ khoá chính / Tình trạng đăng / URL / Mô hình Internal link / Inlink 1-3` hoặc nói "3 đến 3 đi" → dùng skill `mo-hinh-3-den-3-di` để xếp và sinh hàng Internal link trước, rồi mới chạy quy trình dưới.
+
 0. **Chưa có mô hình** (người dùng đưa bảng anchor + số lần, cột Key/URL/Anchor còn trống) hoặc người dùng muốn xếp lại → làm theo skill `len-mo-hinh` (quét → chấm theo nội dung → đo sức chứa → HỎI khi thiếu → xếp → ghi). Xong mới sang bước 1.
 1. **Đọc sheet.** `python $S read $A <key> "<tab>" .tmp/sheet.json` — script tự tìm dòng tiêu đề (người dùng có thể chèn dòng ghi chú phía trên), trả về `rowIndex` = số hàng THẬT, và danh sách cột ô tick. Không OAuth → `read-public` (chỉ đọc).
    Kiểm header theo skill `sheet-internal-link`. Thiếu cột do người điền → báo tên header thật và dừng; thiếu riêng `Đoạn chèn (đọc duyệt)` → `insert-column`.
