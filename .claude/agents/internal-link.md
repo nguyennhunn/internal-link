@@ -42,11 +42,17 @@ Người dùng đưa sheet có cột `STT / Nhóm / Từ khoá chính / Tình tr
    `write-rows` ghi theo TÊN cột, tự sao lưu ô cũ (`.tmp/sao-luu/`), bỏ qua hàng mà sheet đã bị sửa trong lúc chạy (`expect` lệch), KHÔNG ghi chữ vào cột ô tick. Có hàng bị bỏ qua → đọc lại sheet, làm lại hàng đó, không ép ghi.
    Định dạng ô: `Đoạn cần chèn` = `[n] <p>…</p>` cách nhau dòng trống; `Đoạn chèn (đọc duyệt)` = chữ thường, anchor bọc «…»; `Vị trí chèn` = mỗi link 1 dòng theo mẫu skill `chen-internal-link`; `Ghi chú` = `[n] …`. Cột `Trạng thái`: chỉ ghi khi cột là chữ (không phải ô tick) — `Đã viết` / `Đã viết 2/3`.
 6. **Xuất trang duyệt:** gom `.tmp/ket-qua.json` theo skill `xuat-duyet` rồi `python .claude/skills/xuat-duyet/scripts/xuat_duyet.py .tmp/ket-qua.json duyet-internal-link-<YYYY-MM-DD>.html "<Tên dự án>"` → SendUserFile.
+6b. **Chèn lên web (khi người dùng yêu cầu)** theo skill `chen-wordpress`: `thu` → chèn thử 1 bài → chạy hàng loạt → `kiem-lai`
+   → đồng bộ Trạng thái trên sheet. Sao lưu và hoàn tác theo skill đó.
+6c. **Kiểm định kỳ** (người dùng hỏi "check lại inlink", hoặc sau khi bài được viết lại/đăng mới): `chen_wp.py kiem-lai` cho các đoạn
+   đã chèn (mất đoạn, mất link, lặp đoạn, đích 301/404) và skill `kiem-link` cho toàn bộ link nội bộ trong các bài; liệt kê việc mới
+   theo skill `mo-hinh-3-den-3-di` (bài mới đăng). Ghi kết quả ra cột riêng, không chèn vào cột Ghi chú của người dùng.
 7. **Báo cáo ngắn:** số bài / số link đã viết, số đoạn đạt / sửa nhẹ / KHÓ NỐI, bỏ qua, lỗi; file sao lưu nếu đã ghi. Nhắc người duyệt đánh dấu cột trạng thái (ô tick hoặc *Đã chèn*) để lần sau agent không đụng lại.
 
 ## Ranh giới
 
-- Không sửa bài trên website. Chỉ ghi sheet và xuất HTML.
+- Mặc định không sửa bài trên website: chỉ ghi sheet và xuất HTML. Chỉ chèn lên web (skill `chen-wordpress`) khi người dùng
+  ra lệnh rõ, đã có Application Password, đã chạy `thu` và chèn thử 1 bài được người dùng xem.
 - Không ghi đè `Đoạn cần chèn` đã có chữ, trừ khi người dùng bảo "viết lại hàng N".
 - Không ghi bằng địa chỉ ô (A1) tự đếm — luôn `write-rows` theo tên cột + `expect`.
 - Không đổi anchor text. Anchor không xuôi → vẫn dùng nguyên, ghi đề xuất vào Ghi chú.

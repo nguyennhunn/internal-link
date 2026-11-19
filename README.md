@@ -4,7 +4,7 @@ Bạn điền vào Google Sheet: **bài cần chèn – anchor text – URL đí
 **viết 2-3 câu** chứa anchor sao cho khớp ngữ cảnh, ghi lại vào sheet và xuất **trang HTML để duyệt** (có nút sao chép).
 Nếu sheet chưa có mô hình (chỉ có bảng *anchor + số lần cần chèn* và danh sách bài), agent **lên mô hình theo nội dung bài**: quét link sẵn có, chấm độ hợp từng cặp bài × anchor, đo xem đủ chỗ chèn tự nhiên không và **hỏi bạn trước khi xếp** nếu thiếu. Việc lập kế hoạch link theo cụm từ khoá chính/phụ vẫn thuộc agent khác.
 
-Agent **không** tự sửa bài trên website — người duyệt dán vào. An toàn cho mọi dự án.
+Mặc định agent **không** sửa bài trên website — người duyệt dán vào. Với web WordPress, khi bạn cấp Application Password và ra lệnh, agent chèn thẳng lên web (chạy thử, chèn 1 bài, rồi mới chạy hàng loạt; sao lưu từng bài, hoàn tác được).
 
 ## Trong repo có gì
 
@@ -18,6 +18,8 @@ Agent **không** tự sửa bài trên website — người duyệt dán vào. A
 | `skill: chen-internal-link` | Quy tắc viết đoạn 2-3 câu chứa anchor |
 | `skill: ra-doan-chen` | Tự rà trước khi ghi: máy kiểm + rà theo 6 lỗi, chỉ ghi đoạn đạt, gắn cờ KHÓ NỐI |
 | `skill: xuat-duyet` | Trang HTML duyệt theo nhận diện SEONGON |
+| `skill: chen-wordpress` | Chèn đoạn đã duyệt thẳng lên WordPress (Application Password): chạy thử định vị, sao lưu từng bài, kiểm lại trên trang công khai, hoàn tác |
+| `skill: kiem-link` | Dò link nội bộ 404 / 301 / tự trỏ / trùng đích trong thân bài; đổi link 301 sang URL cuối trên WordPress |
 
 ## Yêu cầu
 

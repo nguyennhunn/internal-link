@@ -19,6 +19,14 @@ Trong **một nhóm** bài (cột `Nhóm`, vd "Phạt nguội"), xếp theo `STT
 - Mỗi bài nhận đúng 3 link về từ 3 bài đứng trước: 1 key chính + 1 key phụ + 1 title → hồ sơ anchor tự nhiên.
 - **Bài "Chưa đăng"** vẫn giữ chỗ trong chuỗi (STT không đổi): làm đích thì ô anchor/URL để trống kèm ghi chú, làm nguồn thì chưa viết đoạn; đăng xong chạy lại để fill.
 - Nhóm < 4 bài: cảnh báo, vẫn xếp (sẽ có bài trùng đích).
+- **Key phụ chọn 1 lần rồi cố định** (người dùng chốt 13/11/2026): ghi giá trị vào ô, KHÔNG để hàm tự chọn lại theo hạng mới
+  của file check top — hạng đổi làm anchor trên sheet lệch anchor đã chèn lên web. Bài đã nhận link [2] thì key phụ = đúng anchor đã chèn.
+  Title cũng vậy: chèn xong thì giữ title đã dùng làm anchor.
+- **Các nhóm/chủ đề phải nằm liền khối** trong sheet; STT tăng dần từ 1 theo thứ tự chủ đề (dùng `=ROW()-1` thì thêm/bớt hàng không lệch).
+- **Chạy lại khi có bài mới đăng**: đoạn chèn chỉ viết cho link đã có lúc chạy. Mỗi đợt, đối chiếu mô hình với nhật ký đã chèn
+  (tab "Đoạn chèn" hoặc `.tmp/wp/<key>/chen-log.json`) để lấy đúng 2 loại việc mới: bài nguồn mới đăng (đủ 3 link) và
+  link tới bài đích mới đăng ở các bài nguồn đã chèn trước đó. Không viết lại link đã chèn.
+- Bài sắp đăng lại nội dung mới vào URL cũ: không viết đoạn ở vai bài nguồn cho tới khi bài mới lên.
 - Ví dụ thật (OSAKAR phạt nguội): bài 1 Bình Dương → "camera đồng nai" (key chính bài 2) · "các tuyến đường có camera phạt nguội ở tphcm" (key phụ bài 3) · "21+ điểm lắp camera phạt nguội Nghệ An mới nhất 2026" (title bài 4).
 
 ## Đầu vào cần gom thành `.tmp/nhom.json`
